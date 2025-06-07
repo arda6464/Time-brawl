@@ -24,24 +24,42 @@
 
 #### discord bot komutları
 
-- !help - tüm mevcut komutları gösterir
+- !yardım - tüm mevcut komutları gösterir
+- !admin - admin komutları gösterir
 - !status - sunucu durumunu gösterir
 - !ping - pong ile yanıt verir
 - !unlockall - oyuncunun hesabındaki HER ŞEYİ açar (!unlockall [TAG])
+- !unlockskins - oyuncunun tüm kostümlerini açar (!unlockskins [TAG])
 - !givepremium - bir hesaba premium verir (!givepremium [TAG])
+- !removepremium - bir hesaptan premium'i kaldırır (!removepremium [TAG])
 - !ban - bir hesabı yasaklar (!ban [TAG])
 - !unban - bir hesabın yasağını kaldırır (!unban [TAG])
+- !banip - bir IP adresini yasaklar (!banip [IP])
+- !unbanip - bir IP adresinin yasağını kaldırır (!unbanip [IP])
 - !mute - bir oyuncuyu susturur (!mute [TAG])
 - !unmute - bir oyuncunun susturmasını kaldırır (!unmute [TAG])
 - !resetseason - sezonu sıfırlar
-- !changename - bir oyuncunun adını değiştirir (!changename [TAG] [yeniAd])
+- !isimdegistir - bir oyuncunun adını değiştirir (!isimdegistir [TAG] [yeniAd])
 - !reports - tüm raporlanan mesajların bağlantısını gönderir
 - !userinfo - oyuncu bilgilerini gösterir (!userinfo [TAG])
-- !changecredentials - bir hesabın kullanıcı adı/şifresini değiştirir (!changecredentials [TAG] [yeniKullanıcıAdı] [yeniŞifre])
+- !iddegis - bir hesabın kullanıcı adı/şifresini değiştirir (!iddegis [TAG] [yeniKullanıcıAdı] [yeniŞifre])
 - !settrophies - tüm savaşçılar için kupa sayısını ayarlar (!settrophies [TAG] [Kupalar])
+- !addtrophies - tüm savaşçılara kupa ekler (!addtrophies [TAG] [Kupalar])
 - !addgems - bir oyuncuya elmas verir (!addgems [TAG] [Elmas])
-- !givepremium - bir hesaba bir aylık premium verir (!givepremium [TAG])
-
+- !removegems - bir oyuncudan elmas alır (!removegems [TAG] [Elmas])
+- !gemsall - tüm oyunculara elmas verir (!gemsall [Miktar] [Mesaj])
+- !liderlik - liderlik tablosunu gösterir
+- !startevent - bir etkinliği başlatır (!startevent [TAG])
+- !event - etkinlik durumunu gösterir (!event [TAG])
+- !addteklif - yeni bir mağaza teklifi ekler (!addteklif [Başlık] [SüreGün] [ÜrünTürü] [Miktar] [Fiyat])
+- !deleteclub - bir kulübü siler (!deleteclub [KulüpTAG])
+- !bildirimall - tüm oyunculara bildirim gönderir (!bildirimall [Mesaj])
+- !ozelmesaj - özel bir mesaj gönderir (!ozelmesaj [Mesaj])
+- !popupall - tüm oyunculara popup gönderir
+- !kapatmesaj - sunucu kapatma mesajı gönderir (!kapatmesaj [Mesaj])
+- !kayıt - yeni bir hesap kaydeder (!kayıt [TAG])
+- !hesabım - hesap bilgilerini gösterir (!hesabım [TAG])
+(komutların çoğu hatalı olabilir ve yorum satırına alınmış olabilir lütfen ellemeyin.)
 
 #### kulüp komutları
 
