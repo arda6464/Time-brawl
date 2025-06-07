@@ -3,7 +3,7 @@
 29.258 sürümüne dayalı Brawl Stars özel sunucusu
 
 ## İstemciyi [buradan](https://mega.nz/file/ajRBxSLC#AQHc3MEfuEf9NHBlDMKuFfM2p7wyCT5nq-Ex_Hn5gFg) indirin
-![Logo](https://github.com/Erder00/royale-brawl-v29/blob/main/docs/screenshots/lobby.png?raw=true)
+![Logo](https://github.com/arda6464/royale-brawl-v29/blob/main/docs/screenshots/lobby.png?raw=true)
 
 
 ## Özellikler
@@ -42,6 +42,7 @@
 - !addgems - bir oyuncuya elmas verir (!addgems [TAG] [Elmas])
 - !givepremium - bir hesaba bir aylık premium verir (!givepremium [TAG])
 
+
 #### kulüp komutları
 
 - /help - tüm mevcut komutları listeler
@@ -66,7 +67,7 @@ apk'yı decompile edin ve `lib/armeabi-v7a/liberder.script.so` dosyasındaki ip 
 
 ## Teşekkürler
 
- - [xeon](https://git.xeondev.com/xeon)'un [royale brawl](https://github.com/Erder00/royale-brawl) projesine dayanmaktadır
+ - [xeon](https://git.xeondev.com/xeon) ve Erder'in [royale brawl](https://github.com/Erder00/royale-brawl) projesine dayanmaktadır
  - discord işlemleri için [netcord](https://netcord.dev) kullanılmaktadır (gerçekten harika, bir göz atın)
  - [spz](https://github.com/spz2020), [santer](https://github.com/SANS3R66) ve [8Hacc](https://github.com/8-bitHacc)'a pull request'leri için teşekkürler <3
 
