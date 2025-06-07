@@ -3,7 +3,7 @@
 29.258 sürümüne dayalı Brawl Stars özel sunucusu
 
 ## İstemciyi [buradan](https://mega.nz/file/ajRBxSLC#AQHc3MEfuEf9NHBlDMKuFfM2p7wyCT5nq-Ex_Hn5gFg) indirin
-![Logo](https://github.com/arda6464/royale-brawl-v29/blob/main/docs/screenshots/lobby.png?raw=true)
+![Logo](https://github.com/arda6464/Time-brawl/blob/main/docs/screenshots/lobby.png?raw=true)
 
 
 ## Özellikler
