@@ -79,7 +79,7 @@ Nasıl kurulur:
 [Linux](https://github.com/arda6464/Time-brawl/blob/main/docs/Linux.md)
 [Windows](https://github.com/arda6464/Time-brawl/blob/main/docs/Windows.md)
 
-Ardından [hazır istemciyi](https://mega.nz/file/ajRBxSLC#AQHc3MEfuEf9NHBlDMKuFfM2p7wyCT5nq-Ex_Hn5gFg) kullanarak sunucuya bağlanın
+Ardından [hazır istemciyi](https://mega.nz/file/r8ZUjbSY#AdUgm2Br2_SYGZDlGhY1V7zaWih55ulhNmzedf7dg4A) kullanarak sunucuya bağlanın
 
 apk'yı decompile edin ve `lib/armeabi-v7a/liberder.script.so` dosyasındaki ip adresini kendi ip adresinizle değiştirin
 
