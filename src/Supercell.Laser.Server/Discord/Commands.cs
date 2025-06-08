@@ -9,7 +9,7 @@
     using System.IO;
     using System.Text;
     using Newtonsoft.Json;
-    using Supercell.Laser.Server; // Creators sınıfını eklemek için gerekli
+    using Supercell.Laser.Server; 
     using Newtonsoft.Json.Linq;
     using MySql.Data.MySqlClient;
     using NetCord.Services.Commands;
@@ -121,7 +121,7 @@
 
 
   
-public static class WebhookHelper
+public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsanız bu sınıfı yorum satırı haline getirin
 {
     private static readonly string WebhookUrl = "https://discord.com/api/webhooks/1324821140069416960/RBn5ZcA581XFof69gYD1YHY2mAOaaY5vl8gSg1OoGeRZh_HIzm-zO3_6-d_SwrWjyZQH";
 
@@ -148,7 +148,7 @@ public static class WebhookHelper
 
 
 
-public class AddTeklifCommand : CommandModule<CommandContext>
+/*public class AddTeklifCommand : CommandModule<CommandContext>
 {
     // Tekliflerin ekleneceği dosyanın tam yolu
     private static readonly string FilePath = @"C:\Users\arda\Desktop\projeler\time brawl - Kopya (2)\src\Supercell.Laser.Logic\Home\ClientHome.cs";
@@ -193,7 +193,7 @@ public class AddTeklifCommand : CommandModule<CommandContext>
             return $"Hata: Teklif eklenirken bir sorun oluştu. ({ex.Message})";
         }
     }
-}
+}*/
 
 
 
@@ -206,7 +206,7 @@ public class AddTeklifCommand : CommandModule<CommandContext>
         public static string Pong() => "Pong!";
     }
 
-    public class Deleteclub : CommandModule<CommandContext>
+    public class Deleteclub : CommandModule<CommandContext> // çalışıyor mu hatırlamıyorum sanırım çalışmıyordu
     {
         [Command("deleteclub")]
         public static string DeleteClub([CommandParameter(Remainder = true)] string clubTag)
@@ -276,7 +276,7 @@ public class AddTeklifCommand : CommandModule<CommandContext>
                 + "!addgems - grant gems to a player (!addgems [TAG] [DonationCount])\n";
         }
     }
- public class SendShutdownMessage : CommandModule<CommandContext>
+ public class SendShutdownMessage : CommandModule<CommandContext> // test edilmedi!!!
     {
         [Command("kapatmesaj")]
         public static string ExecuteSendShutdownMessage([CommandParameter(Remainder = true)] string message)
@@ -321,7 +321,7 @@ public class AddTeklifCommand : CommandModule<CommandContext>
             }
         }
 
-   public class SendCustomMessage : CommandModule<CommandContext>
+   public class SendCustomMessage : CommandModule<CommandContext> // test edilmedi!!!
     {
         [Command("ozelmesaj")]
         public static string ExecuteSendCustomMessage([CommandParameter(Remainder = true)] string message)
@@ -503,8 +503,8 @@ public class AddTeklifCommand : CommandModule<CommandContext>
                     // Bildirim oluştur
                     Notification notification = new()
                     {
-                        Id = 81,  // Bildirim ID'si, sabit kalabilir
-                        MessageEntry = customMessage // Kullanıcının mesajını buraya ekle
+                        Id = 81,  // Bildirim idsi
+                        MessageEntry = customMessage // mesaj
                     };
 
                     // Hesabın bildirim fabrikasına bildirimi ekle
@@ -559,15 +559,15 @@ public class LeaderboardCommand : CommandModule<CommandContext>
     {
         try
         {
-            // Örnek oyuncu listesi
-            var accounts = Accounts.GetRankingList(); // Bu metodun gerçek bir veritabanından oyuncu verisi çekmesi gerektiğini unutmayın.
+           
+            var accounts = Accounts.GetRankingList(); // tüm hesapları çek
 
             if (accounts == null || !accounts.Any())
             {
                 return "Veritabanında hiçbir oyuncu bulunamadı.";
             }
 
-            // İlk 20 oyuncuyu al
+            // İlk 20 oyuncuyu al (butonlu sistem olsaydı 200'e kadar alabilirdik...)
             var top20Players = accounts.Take(20).ToList();
 
             // Liderlik tablosu metni oluştur
@@ -597,9 +597,9 @@ public class LeaderboardCommand : CommandModule<CommandContext>
 
 
 
+// buyük ihtimal çalışmıyordu
 
-
-public class UnlockAll : CommandModule<CommandContext>
+/*public class UnlockAll : CommandModule<CommandContext>
 {
     [Command("unlockskins")]
     public static string UnlockAllCommand([CommandParameter(Remainder = true)] string playerId)
@@ -680,7 +680,7 @@ public class UnlockAll : CommandModule<CommandContext>
             return $"An error occurred while processing: {ex.Message}";
         }
     }
-}
+}*/
 
 
 
@@ -944,7 +944,7 @@ public class UnlockAll : CommandModule<CommandContext>
 }
 
 
-        public class SetTrophies : CommandModule<CommandContext> //TODO add confirmation
+        public class SetTrophies : CommandModule<CommandContext> 
         {
             [Command("settrophies")]
             public static string settrophies(
@@ -998,7 +998,7 @@ public class UnlockAll : CommandModule<CommandContext>
 
 
 
-        public class AddTrophies : CommandModule<CommandContext> // TODO confirmation needed
+        public class AddTrophies : CommandModule<CommandContext> // set ile arasındaki fark, bu komut mevcut kupalara ekleme yapar diğeri girilen değerli kupayı tüm dövüşçülere ekler
         {
             [Command("addtrophies")]
             public static string addtrophies(
@@ -1134,7 +1134,7 @@ public class UnlockAll : CommandModule<CommandContext>
 
         public class ChangeUserCredentials : CommandModule<CommandContext>
         {
-            [Command("iddegis")]
+            [Command("iddegis")] // database'de değişiklik yapar
             public static string ChangeUserCredentialsCommand(
                 [CommandParameter(Remainder = true)] string input
             )
@@ -1332,7 +1332,7 @@ public class GemsToAll : CommandModule<CommandContext>
                 try
                 {
                     // Tüm oyuncu hesaplarını al
-                    var accounts = Accounts.GetRankingList();  // Bu, tüm oyuncu hesaplarını döndürecektir
+                    var accounts = Accounts.GetRankingList(); 
 
                     if (accounts == null || !accounts.Any())
                     {
@@ -1347,7 +1347,7 @@ public class GemsToAll : CommandModule<CommandContext>
                         // Elmas bildirimi oluştur
                         Notification notification = new()
                         {
-                            Id = 89,  // Özel bir ID atayın
+                            Id = 89,  
                             DonationCount = gemAmount,
                             MessageEntry = parts[1] // Kullanıcının mesajını buraya ekle
                         };
@@ -1509,10 +1509,10 @@ public class SendPopupToAll : CommandModule<CommandContext>
                 Id = 83,
                 PrimaryMessageEntry = "ETKİNLİK BAŞLADI/START EVENTS ",
                 SecondaryMessageEntry = "discorda gelerek etkinliğin ne olduğunu öğrenebilirsin/You can find out what the event is by coming to Discord.",
-                ButtonMessageEntry = "Discorda git/go to discord",
+                ButtonMessageEntry = "Discord",
                 FileLocation = "pop_up_1920x1235_welcome.png",
                 FileSha = "6bb3b752a80107a14671c7bdebe0a1b662448d0c",
-                ExtLint = "brawlstars://extlink?page=https%3A%2F%2Fdiscord.gg%2F/timebrawl"
+                ExtLint = "brawlstars://extlink?page=https%3A%2F%2Fdiscord.gg%2F/timebrawl" // yönlendirilecek link
             };
 
             // Her bir hesap için bildirimi gönder
@@ -1655,7 +1655,7 @@ public async Task GetUserInfo([CommandParameter(Remainder = true)] string player
         )?.ToString() ?? "N/A";
 
         // Kulüp bilgilerini al
-        string allianceName = account.Avatar?.AllianceName ?? "Yok";
+        string allianceName = account.Avatar?.AllianceName ?? "Yok"; // kulüpte değilse yok olarak göster
         string allianceRole = GetAllianceRole(account.Avatar?.AllianceRole);
 
         await Context.Message.ReplyAsync($"# işte {playerId} oyuncusunun bilgileri:\n"
@@ -1697,7 +1697,7 @@ private static string GetAllianceRole(AllianceRole? role)
         AllianceRole.Leader => "Başkan",
         AllianceRole.Elder => "Kıdemli Üye",
         AllianceRole.CoLeader => "Başkan Yardımcısı",
-        _ => "Rolü yok",
+        _ => "Rolü yok", // !?!!?!!!
     };
 }
      public class ResetSeason : CommandModule<CommandContext>
@@ -2233,7 +2233,7 @@ private static string GetAllianceRole(AllianceRole? role)
         return "Geçerli bir oyuncu ID'si değil. ID'nin başında '#' olmalı.";
     }
 
-    // Oyuncu kimliğini uygun bir uzun tamsayıya dönüştür
+
     long lowID = LogicLongCodeGenerator.ToId(playerId);
     // Oyuncunun bilgilerini al
     Account account = Accounts.Load(lowID);
