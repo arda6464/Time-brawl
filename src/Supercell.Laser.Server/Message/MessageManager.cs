@@ -115,6 +115,8 @@
 
         public void ReceiveMessage(GameMessage message)
         {
+            Console.WriteLine($"MessageManager::ReceiveMessage - {message.GetType().Name} ({message.GetMessageType()})");
+            Console.WriteLine($"Alınan paket - {message.ToString()} ({message.GetMessageType()})");
             switch (message.GetMessageType())
             {
                 case 10100:
@@ -462,7 +464,7 @@
                     return;
                 }
 
-                Account acc = new Account();
+                Account acc = new Account(); // ne alaka ?!?!!
 
                 Notification nGems = new Notification
                 {
@@ -506,7 +508,7 @@
             }
         }
 
-        private void SetSupportedCreator(SetSupportedCreatorMessage message) // credits: tale brawl team
+        private void SetSupportedCreator(SetSupportedCreatorMessage message) // credits: tale brawl team(oeler ama yapmış adamlar saygı duymak lazım)
         {
             string[] validCreators = Configuration.Instance.CreatorCodes.Split(',');
 
@@ -761,19 +763,19 @@
         {
             SendAllianceMailMessage sendAllianceMailMessage = message;
 
-            if (HomeMode.Avatar.AllianceRole != AllianceRole.Leader && HomeMode.Avatar.AllianceRole != AllianceRole.CoLeader) return;
+            if (HomeMode.Avatar.AllianceRole != AllianceRole.Leader && HomeMode.Avatar.AllianceRole != AllianceRole.CoLeader) return; // başkan veya yardımcı değilse iptal
             if (!string.IsNullOrWhiteSpace(message.Text))
             {
                 if (HomeMode.Avatar.AllianceRole != AllianceRole.Leader && HomeMode.Avatar.AllianceRole != AllianceRole.CoLeader) return;
-                if (message.Text.Length > 450) return;
+                if (message.Text.Length > 450) return; // 450 karakterden fazla mesaj gönderemezsin
                 addNotifToAllAccounts(message.Text, HomeMode.Avatar.AllianceId);
 
                 AllianceResponseMessage responseMessages = new AllianceResponseMessage();
-                responseMessages.ResponseType = 113;
+                responseMessages.ResponseType = 113; // Alliance mail gönderildi mesajı
                 Connection.Send(responseMessages);
             }
 
-            AllianceResponseMessage responseMessage = new AllianceResponseMessage();
+            AllianceResponseMessage responseMessage = new AllianceResponseMessage(); 
             responseMessage.ResponseType = 114;
             Connection.Send(responseMessage);
 
@@ -794,7 +796,7 @@
             if (HomeMode.Avatar.AllianceRole <= avatar.AllianceRole) return;
 
             alliance.Members.Remove(member);
-            avatar.AllianceId = -1;
+            avatar.AllianceId = -1; // artık kulüpte değil....
 
             AllianceStreamEntry entry = new AllianceStreamEntry();
             entry.AuthorId = HomeMode.Avatar.AccountId;
@@ -1399,6 +1401,37 @@
                         response.Entry.Message = $"Unknown command \"{cmd[0]}\" - type \"/help\" to get command list!";
                         Connection.Send(response);
                         break;
+                    case "kulüpad":
+                    if (cmd.Length != 2)
+                    {
+                        response.Entry.Message = $"Kullanım:  /kulüpad [alliance name]";
+                        Connection.Send(response);
+                        return;
+                    }
+                        if (HomeMode.Avatar.AllianceRole != allianceRole.Leader)
+                        {
+                            response.Entry.Message = $"kulüp'ün kurucusu değilsin!";
+                            Connection.Send(response);
+                            return;
+                        }
+                       string allianceName = cmd[1].Trim();
+                        if (allianceName.Length < 3 || allianceName.Length > 20)
+                        {
+                            response.Entry.Message = $"Kulüp adı 3-20 karakter arasında olmalıdır.";
+                            Connection.Send(response);
+                            return;
+                        }
+                        if (allianceName.Contains(" "))
+                        {
+                            response.Entry.Message = $"Kulüp adı boşluk içeremez.";
+                            Connection.Send(response);
+                            return;
+                        }
+                         alliance.Name = allianceName;
+                         response.Entry.Message = $"Kulüp adı başarıyla değiştirildi: {alliance.Name}";
+                        Connection.Send(response);
+                      break;
+                    
                     // ACCOUNT SYSTEM HERE
                     case "register":
                         if (cmd.Length != 3)
@@ -1819,7 +1852,7 @@
         private void AskForJoinableAllianceListReceived(AskForJoinableAllianceListMessage message)
         {
             JoinableAllianceListMessage list = new JoinableAllianceListMessage();
-            List<Alliance> alliances = Alliances.GetRandomAlliances(10)
+            List<Alliance> alliances = Alliances.GetRandomAlliances(20)
                                             .Distinct()
                                             .ToList();
 
@@ -2836,8 +2869,26 @@
             team.TeamUpdated();
         }
 
+        private void DeviceInfoRecieved(AuthenticationMessage message)
+        {
+            if (message == null || string.IsNullOrEmpty(message.DeviceId) || string.IsNullOrEmpty(message.Android) || string.IsNullOrEmpty(Connection.Socket.RemoteEndPoint.ToString()))
+            {
+                SendAuthenticationFailed(1, "Invalid device information.");
+                Console.WriteLine("device info alınamadı bağlantı kesliyor");
+               // Connection.Close(); zaten failed  ediliyor gerek varmı?!!?!
+                return;
+            }
+
+            // Log the device information for debugging purposes
+            Console.WriteLine($"Device ID: {message.DeviceId},\n Android Version: {message.Android},\n IP Address: {Connection.Socket.RemoteEndPoint},\n  dil: {message.DeviceLang},\n  sha: {message.Sha},\n");
+            Console.Write("porno");
+
+          
+        }
+
         private void LoginReceived(AuthenticationMessage message)
         {
+            DeviceInfoRecieved(message);
             Account account = GetAccount(message);
 
             if (account == null)
@@ -2870,18 +2921,18 @@
             }
 
             string[] androidVersionParts = message.Android.Split('.'); // Android sürümü kontrolü
-            
+
             // Emülatör tespiti
             bool isEmulator = false;
             if (message.DeviceId != null)
             {
                 // Yaygın emülatör tanımlayıcıları
-                string[] emulatorIdentifiers = new string[] 
+                string[] emulatorIdentifiers = new string[]
                 {
                     "emulator", "genymotion", "virtualbox", "vbox", "qemu", "android sdk built for x86",
                     "sdk_phone", "sdk_gphone", "google_sdk", "sdk_x86", "goldfish", "ranchu"
                 };
-                
+
                 isEmulator = emulatorIdentifiers.Any(id => message.DeviceId.ToLower().Contains(id.ToLower()));
             }
 

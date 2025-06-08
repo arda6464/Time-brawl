@@ -65,6 +65,9 @@
 
 - /help - tüm mevcut komutları listeler
 - /status - sunucu durumunu gösterir
+- /kulüpad - kulüp adını değiştirir
+- /register - kayıt olur
+- /login hesaba giriş yapar
 
 ## Kurulum
 
