@@ -73,6 +73,7 @@ namespace Supercell.Laser.Logic.Home
         [JsonProperty] public LastMatchResult LastMatchResult { get; set; } // son maç sonucu(gerek varmıydı...)
         [JsonProperty] public int WinStreak { get; set; }
         [JsonProperty] public int MaxWinStreak { get; set; }
+        [JsonProperty] public int ThemeId { get; set; }
 
         [JsonIgnore] public EventData[] Events;
 
@@ -92,6 +93,7 @@ namespace Supercell.Laser.Logic.Home
             ThumbnailId = GlobalId.CreateGlobalId(28, 0);
             NameColorId = GlobalId.CreateGlobalId(43, 0);
             CharacterId = GlobalId.CreateGlobalId(16, 0);
+            ThemeId = 41000015; // Default theme
             SelectedSkins = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
 
             OfferBundles = new List<OfferBundle>();
@@ -1124,7 +1126,7 @@ namespace Supercell.Laser.Logic.Home
             encoder.WriteVInt(2); // IntValueEntries
             {
                 encoder.WriteInt(1);
-                encoder.WriteInt(41000015); // theme
+                encoder.WriteInt(ThemeId); // Use ThemeId instead of hardcoded value
 
                 encoder.WriteInt(46);
                 encoder.WriteInt(1);

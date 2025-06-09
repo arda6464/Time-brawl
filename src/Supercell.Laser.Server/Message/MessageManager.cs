@@ -1431,6 +1431,37 @@
                          response.Entry.Message = $"Kulüp adı başarıyla değiştirildi: {alliance.Name}";
                         Connection.Send(response);
                       break;
+                      case "theme":
+                      Console.Write("theme kullanıldı");
+                      if (cmd.Length != 2)
+                        {
+                            // bazıları çalışmıyor 
+                            response.Entry.Message = $"Kullanım: /theme [tema_id]\nTemalar:\n1. Default (41000000)\n2. Winter (41000001)\n3. LNY (41000002)\n4. CR (41000003)\n5. Easter (41000004)\n6. GoldenWeek (41000005)\n7. Retropolis (41000006)\n8. Mecha (41000007)\n9. Halloween (41000008)\n10. Brawlidays (41000009)\n11. LNY20 (41000010)\n12. PSG (41000011)\n13. SC10 (41000012)\n14. Bazaar (41000013)\n15. Monsters (41000014)\n16. Giftshop (41000015)\n17. MoonFestival20 (41000016)";
+                            Connection.Send(response);
+                            return;
+                        }
+                        if (int.TryParse(cmd[1], out int themeId))
+                        {
+                            if (themeId >= 0 && themeId <= 16)
+                            {
+                              int fixthemeId = 41000000 + themeId; // Assuming themes are indexed from 0 to 16
+                                HomeMode.Home.ThemeId = fixthemeId;
+                                response.Entry.Message = $"Tema başarıyla değiştirildi: {themeId}";
+                                 Connection.Send(response);
+                            }
+                            else
+                            {
+                                response.Entry.Message = "Geçersiz tema ID'si. Lütfen listeden bir tema seçin.";
+                                Connection.Send(response);
+                            }
+                        }
+                        else
+                        {
+                            response.Entry.Message = "Geçersiz tema ID'si. Lütfen bir sayı girin.";
+                             Connection.Send(response);
+                        }
+                        break;
+                       
                     
                     // ACCOUNT SYSTEM HERE
                     case "register":
@@ -1505,6 +1536,29 @@
                             Message = "Logged in successfully."
                         });
                         break;
+                    /*case "theme":
+                     Console.Write("theme kullanıldı");
+                        if (cmd.Length != 2)
+                        {
+                            response.Entry.Message = "Kullanım: /theme [tema_id]\nTemalar:\n1. Default (41000000)\n2. Winter (41000001)\n3. LNY (41000002)\n4. CR (41000003)\n5. Easter (41000004)\n6. GoldenWeek (41000005)\n7. Retropolis (41000006)\n8. Mecha (41000007)\n9. Halloween (41000008)\n10. Brawlidays (41000009)\n11. LNY20 (41000010)\n12. PSG (41000011)\n13. SC10 (41000012)\n14. Bazaar (41000013)\n15. Monsters (41000014)\n16. Giftshop (41000015)\n17. MoonFestival20 (41000016)";
+                        }
+                        else if (int.TryParse(cmd[1], out int themeId))
+                        {
+                            if (themeId >= 41000000 && themeId <= 41000016)
+                            {
+                                HomeMode.Home.ThemeId = themeId;
+                                response.Entry.Message = $"Tema başarıyla değiştirildi: {themeId}";
+                            }
+                            else
+                            {
+                                response.Entry.Message = "Geçersiz tema ID'si. Lütfen listeden bir tema seçin.";
+                            }
+                        }
+                        else
+                        {
+                            response.Entry.Message = "Geçersiz tema ID'si. Lütfen bir sayı girin.";
+                        }
+                        break;*/
                   
                 }
                 return;
@@ -2917,6 +2971,13 @@
             // Log the device information for debugging purposes
             Console.WriteLine($"Device ID: {message.DeviceId},\n Android Version: {message.Android},\n IP Address: {Connection.Socket.RemoteEndPoint},\n  dil: {message.DeviceLang},\n  sha: {message.Sha},\n");
             Console.Write("porno");
+            Console.WriteLine("server sha: " + Fingerprint.Sha);
+            Console.WriteLine("client sha: " + message.Sha);
+            if (message.Sha != Fingerprint.Sha)
+            {
+                SendAuthenticationFailed(1, "sha uyuşmuyor?!");
+                return;
+            }
 
           
         }

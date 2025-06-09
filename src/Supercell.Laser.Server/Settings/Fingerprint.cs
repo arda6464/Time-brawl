@@ -17,7 +17,7 @@
             Version = jsonObject.GetJSONString("version").GetStringValue();
             FullDump = json;
 
-            Logger.Print($"Loaded fingerprint.json v{Version}");
+            Logger.Print($"Loaded fingerprint.json v{Version}, sha: {Sha}");
         }
     }
 }
