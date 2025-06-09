@@ -320,6 +320,13 @@ function bypass() {
         }
     })
 }
+const toast = function(text) { // credit: mehmetefefriday
+    Java.scheduleOnMainThread(() => {
+        Java.use("android.widget.Toast")
+            .makeText(Java.use("android.app.ActivityThread").currentApplication().getApplicationContext(), Java.use("java.lang.StringBuilder").$new(text), 1).show();
+    });
+};
+toast("time team")
 
 function init() {
     bypass()

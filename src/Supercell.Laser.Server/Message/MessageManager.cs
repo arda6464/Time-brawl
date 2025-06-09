@@ -2959,7 +2959,7 @@
             }
 
             // Oturum sayısını artır
-            account.Home.IncrementSessionsCount();
+           // account.Home.IncrementSessionsCount();
             
             string[] androidVersionParts = message.Android.Split('.'); // Android sürümü kontrolü
 
