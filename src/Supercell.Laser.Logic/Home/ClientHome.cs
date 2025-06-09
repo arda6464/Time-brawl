@@ -1160,16 +1160,16 @@ namespace Supercell.Laser.Logic.Home
     // Son maç sonucu için yapı
     public class LastMatchResult
     {
-        [JsonProperty] public int Result { get; set; } // Maç sonucu (0: zafer, 1: yenilgi)
+        [JsonProperty] public string Result { get; set; } // Maç sonucu (0: zafer, 1: yenilgi)
 
         public LastMatchResult()
         {
-            Result = 1; // Varsayılan olarak yenilgi
+            Result = "draw"; // Varsayılan olarak yenilgi
         }
 
-        public override string ToString()
+        public override string ToString() // kullanılmıyor gibi
         {
-            return Result == 0 ? "Zafer" : "Yenilgi";
+            return Result == "win" ? "kazandı" : "kaybetti";
         }
     }
 }
