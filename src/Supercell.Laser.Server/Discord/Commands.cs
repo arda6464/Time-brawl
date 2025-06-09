@@ -333,9 +333,9 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
                     sentCount++;
                 }
 
-                WebhookHelper.SendNotification(
+             /*   WebhookHelper.SendNotification(
                     $"Özel mesaj gönderildi: {message}\nToplam {sentCount} oyuncuya iletildi."
-                );
+                );*/
 
                 return $"Özel mesaj başarıyla gönderildi. Toplam {sentCount} oyuncuya iletildi.";
             }
@@ -2464,7 +2464,7 @@ public class UserInfoo : CommandModule<CommandContext>
     }
 }
     
- public class SendShutdownMessage : CommandModule<CommandContext> // test edilmedi!!!
+ public class SendShutdownMessage : CommandModule<CommandContext> // (çalışmıyor)
 {
     [Command("kapatmesaj")]
     public static string ExecuteSendShutdownMessage([CommandParameter(Remainder = true)] string message)

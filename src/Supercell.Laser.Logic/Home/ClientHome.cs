@@ -117,7 +117,7 @@ namespace Supercell.Laser.Logic.Home
             LastMatchResult = null;
         }
 
-        public void UpdateLastMatchResult(int result)
+        public void UpdateLastMatchResult(string result)
         {
             if (LastMatchResult == null)
             {
@@ -126,9 +126,9 @@ namespace Supercell.Laser.Logic.Home
             LastMatchResult.Result = result;
         }
 
-        public void UpdateWinStreak(int result)
+        public void UpdateWinStreak(string result)
         {
-            if (result == 1)
+            if (result == "win")
             {
                 WinStreak++;
                 if (WinStreak > MaxWinStreak)

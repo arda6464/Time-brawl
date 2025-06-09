@@ -115,8 +115,8 @@
 
         public void ReceiveMessage(GameMessage message)
         {
-            Console.WriteLine($"MessageManager::ReceiveMessage - {message.GetType().Name} ({message.GetMessageType()})");
-            Console.WriteLine($"Alınan paket - {message.ToString()} ({message.GetMessageType()})");
+          //  Console.WriteLine($"MessageManager::ReceiveMessage - {message.GetType().Name} ({message.GetMessageType()})");
+            //Console.WriteLine($"Alınan paket - {message.ToString()} ({message.GetMessageType()})");
             switch (message.GetMessageType())
             {
                 case 10100:
@@ -2634,10 +2634,11 @@
                     : $"Player {LogicLongCodeGenerator.ToCode(HomeMode.Avatar.AccountId)} ended battle! Battle Result: {battleResults[message.BattleResult]} in {battleDuration}s gamemode: {location.GameMode}!";
 
                 Logger.BLog(logMessage);
-                 HomeMode.Home.UpdateLastMatchResult(message.BattleResult);
+                // todo: hesaplaşmaya ayrı sistem mı yapılacak???? çünkü 1,2,3,4,5,6,7,8,9,10 değerleri sıkıntı olcak
+                 HomeMode.Home.UpdateLastMatchResult(battleResults[message.BattleResult]);
                 Console.WriteLine("Last match result saved: " + HomeMode.Home.LastMatchResult?.Result);
 
-                HomeMode.Home.UpdateWinStreak(message.BattleResult);
+                HomeMode.Home.UpdateWinStreak(battleResults[message.BattleResult]);
                 Console.WriteLine("Win streak updated: " + HomeMode.Home.WinStreak);
                 
 
@@ -2869,6 +2870,7 @@
                 Name = message.Name,
                 ChangeNameCost = 0
             };
+            Console.WriteLine("ChangeName method called with name: " + message.Name);
             if (HomeMode.Avatar.AllianceId >= 0)
             {
                 Alliance a = Alliances.Load(HomeMode.Avatar.AllianceId);
@@ -2921,9 +2923,12 @@
 
         private void LoginReceived(AuthenticationMessage message)
         {
-            DeviceInfoRecieved(message); // ÇALIŞACAKMI LA?!
-            Console.WriteLine("deviceinfo method called");
+            DeviceInfoRecieved(message);
+
+          //  Console.WriteLine("deviceinfo method called");
             Account account = GetAccount(message);
+            account.Home.SessionsCount++;
+            Console.WriteLine("SessionsCount: " + account.Home.SessionsCount); // test için
 
             if (account == null)
             {
