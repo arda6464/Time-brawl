@@ -6,7 +6,6 @@
   "mysql_password": "arda64",
   "mysql_database": "test",
   "anti-ddos": false,
-  "BotToken": "YOUR_BOT_TOKEN_HERE",
-  "ChannelId": 1234567890123456789,
+  "BotToken": "MTI1NDUzNzE0ODQ5MzcyNTc3Ng.G0bdTI.MKLlLU44OE2c-tvuCP9_fxu-2zQt1DLopfr8-s",
   "CreatorCodes": "erder,xeon,santer,spz,8Hacc"
 }

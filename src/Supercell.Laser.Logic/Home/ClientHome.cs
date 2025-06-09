@@ -69,9 +69,10 @@ namespace Supercell.Laser.Logic.Home
         [JsonProperty] public string Device;
         [JsonProperty] public List<string> OffersClaimed;
         [JsonProperty] public string Day;
-
-        [JsonProperty] public int SessionsCount { get; set; } // Oturum sayısı
-        [JsonProperty] public LastMatchResult LastMatchResult { get; set; } // Son maç sonucu
+        [JsonProperty] public int SessionsCount { get; set; } // giriş sayısı
+        [JsonProperty] public LastMatchResult LastMatchResult { get; set; } // son maç sonucu(gerek varmıydı...)
+        [JsonProperty] public int WinStreak { get; set; }
+        [JsonProperty] public int MaxWinStreak { get; set; }
 
         [JsonIgnore] public EventData[] Events;
 
@@ -123,6 +124,22 @@ namespace Supercell.Laser.Logic.Home
                 LastMatchResult = new LastMatchResult();
             }
             LastMatchResult.Result = result;
+        }
+
+        public void UpdateWinStreak(int result)
+        {
+            if (result == 1)
+            {
+                WinStreak++;
+                if (WinStreak > MaxWinStreak)
+                {
+                    MaxWinStreak = WinStreak;
+                }
+            }
+            else
+            {
+                WinStreak = 0;
+            }
         }
 
         public void HomeVisited()

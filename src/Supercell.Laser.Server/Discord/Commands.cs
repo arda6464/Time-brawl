@@ -1436,12 +1436,13 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
             string soloWins = ConvertInfoToData(account.Avatar.SoloWins);
             string duoWins = ConvertInfoToData(account.Avatar.DuoWins);
             string trioWins = ConvertInfoToData(account.Avatar.TrioWins);
-            string totalwins = soloWins + duoWins + trioWins;
+          int totalwins = int.Parse(soloWins) + int.Parse(duoWins) + int.Parse(trioWins);
             string trophies = ConvertInfoToData(account.Avatar.Trophies);
-            string banned = ConvertInfoToData(account.Avatar.Banned);
-            string muted = ConvertInfoToData(account.Avatar.IsCommunityBanned);
+            string banned = ConvertInfoToData(account.Avatar.Banned ? "Banlı" : "değil");
+            string muted = ConvertInfoToData(account.Avatar.IsCommunityBanned ? "Muted" : "değil");
             string sessions = ConvertInfoToData(account.Home.SessionsCount);
            string lastMatch = account.Home.LastMatchResult?.Result.ToString() ?? "No match result";
+           string WinStreak = ConvertInfoToData(account.Home.WinStreak);
 
 
             string username = DatabaseHelper.ExecuteScalar(
@@ -1469,6 +1470,7 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
                 + $"Banned: {banned}\n"
                 + $"Oturum sayısı: {sessions}\n"
                 + $"Son maç sonucu: {lastMatch}\n"
+                + $"Win Streak: {WinStreak}\n"
                 + $"# TİME ID\n"
                 + $"kullanıcıadı {username}\n"
                 + $"şifre {password}";

@@ -2635,8 +2635,12 @@
 
                 Logger.BLog(logMessage);
                  HomeMode.Home.UpdateLastMatchResult(message.BattleResult);
-                Console.WriteLine("Last match result saved:");
-                Console.WriteLine(HomeMode.Home.LastMatchResult);
+                Console.WriteLine("Last match result saved: " + HomeMode.Home.LastMatchResult?.Result);
+
+                HomeMode.Home.UpdateWinStreak(message.BattleResult);
+                Console.WriteLine("Win streak updated: " + HomeMode.Home.WinStreak);
+                
+
 
                 // Anti-cheat logic
                 if (message.BattleResult < 5 || message.BattleResult > 10)
