@@ -1408,7 +1408,7 @@
                         Connection.Send(response);
                         return;
                     }
-                        if (HomeMode.Avatar.AllianceRole != allianceRole.Leader)
+                        if (HomeMode.Avatar.AllianceRole != AllianceRole.Leader)
                         {
                             response.Entry.Message = $"kulüp'ün kurucusu değilsin!";
                             Connection.Send(response);
@@ -2289,7 +2289,30 @@
                             HomeMode.Home.StarTokensReward = 1;
                         }
                         */
-                    }
+                }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                     if (brawlerTrophies >= 0 && brawlerTrophies <= 49)
                     {
@@ -2611,6 +2634,9 @@
                     : $"Player {LogicLongCodeGenerator.ToCode(HomeMode.Avatar.AccountId)} ended battle! Battle Result: {battleResults[message.BattleResult]} in {battleDuration}s gamemode: {location.GameMode}!";
 
                 Logger.BLog(logMessage);
+                 HomeMode.Home.UpdateLastMatchResult(message.BattleResult);
+                Console.WriteLine("Last match result saved:");
+                Console.WriteLine(HomeMode.Home.LastMatchResult);
 
                 // Anti-cheat logic
                 if (message.BattleResult < 5 || message.BattleResult > 10)
@@ -2676,10 +2702,13 @@
                     HasNoTokens = HasNoTokens,
                     MilestoneRewards = MilestoneRewards,
                 };
+               
 
                 Connection.Send(battleend);
             }
         }
+        
+
 
         private void GetLeaderboardReceived(GetLeaderboardMessage message)
         {
@@ -2875,7 +2904,7 @@
             {
                 SendAuthenticationFailed(1, "Invalid device information.");
                 Console.WriteLine("device info alınamadı bağlantı kesliyor");
-               // Connection.Close(); zaten failed  ediliyor gerek varmı?!!?!
+               // Connection.Close(); zaten failed  ediliyor gerek varmı?!
                 return;
             }
 
@@ -2888,7 +2917,8 @@
 
         private void LoginReceived(AuthenticationMessage message)
         {
-            DeviceInfoRecieved(message);
+            DeviceInfoRecieved(message); // ÇALIŞACAKMI LA?!
+            Console.WriteLine("deviceinfo method called");
             Account account = GetAccount(message);
 
             if (account == null)
@@ -2916,10 +2946,12 @@
                 loginFailed.ErrorCode = 1;
                 loginFailed.Message = "clear appdata.";
                 Connection.Send(loginFailed);
-
                 return;
             }
 
+            // Oturum sayısını artır
+            account.Home.IncrementSessionsCount();
+            
             string[] androidVersionParts = message.Android.Split('.'); // Android sürümü kontrolü
 
             // Emülatör tespiti

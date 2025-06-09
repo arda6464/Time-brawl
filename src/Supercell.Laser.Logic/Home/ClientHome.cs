@@ -70,6 +70,9 @@ namespace Supercell.Laser.Logic.Home
         [JsonProperty] public List<string> OffersClaimed;
         [JsonProperty] public string Day;
 
+        [JsonProperty] public int SessionsCount { get; set; } // Oturum sayısı
+        [JsonProperty] public LastMatchResult LastMatchResult { get; set; } // Son maç sonucu
+
         [JsonIgnore] public EventData[] Events;
 
         public PlayerThumbnailData Thumbnail => DataTables.Get(DataType.PlayerThumbnail).GetDataByGlobalId<PlayerThumbnailData>(ThumbnailId);
@@ -109,11 +112,21 @@ namespace Supercell.Laser.Logic.Home
                 NotificationFactory = new NotificationFactory();
             }
 
+            SessionsCount = 0;
+            LastMatchResult = null;
+        }
+
+        public void UpdateLastMatchResult(int result)
+        {
+            if (LastMatchResult == null)
+            {
+                LastMatchResult = new LastMatchResult();
+            }
+            LastMatchResult.Result = result;
         }
 
         public void HomeVisited()
         {
-
             RotateShopContent(DateTime.UtcNow, OfferBundles.Count == 0);
             LastVisitHomeTime = DateTime.UtcNow;
             //Quests = null;
@@ -179,7 +192,6 @@ namespace Supercell.Laser.Logic.Home
                 }
             }
             RotateShopContent(DateTime.UtcNow, OfferBundles.Count == 0);
-
         }
 
         public int GetbattleTokensRefreshSeconds()
@@ -229,7 +241,6 @@ namespace Supercell.Laser.Logic.Home
             {
                 OffersClaimed.Add(bundle.Claim);
             }
-
 
             LogicGiveDeliveryItemsCommand command = new LogicGiveDeliveryItemsCommand();
             Random rand = new Random();
@@ -356,8 +367,6 @@ namespace Supercell.Laser.Logic.Home
                 }
 
                 command.Execute(HomeMode);
-
-
             }
             UpdateOfferBundles();
             AvailableServerCommandMessage message = new AvailableServerCommandMessage();
@@ -1122,6 +1131,28 @@ namespace Supercell.Laser.Logic.Home
             encoder.WriteBoolean(false);
             encoder.WriteVInt(0);
             encoder.WriteVInt(0);
+        }
+
+        // Oturum sayısını artırmak için yardımcı metod
+        public void IncrementSessionsCount()
+        {
+            SessionsCount++;
+        }
+    }
+
+    // Son maç sonucu için yapı
+    public class LastMatchResult
+    {
+        [JsonProperty] public int Result { get; set; } // Maç sonucu (0: zafer, 1: yenilgi)
+
+        public LastMatchResult()
+        {
+            Result = 1; // Varsayılan olarak yenilgi
+        }
+
+        public override string ToString()
+        {
+            return Result == 0 ? "Zafer" : "Yenilgi";
         }
     }
 }

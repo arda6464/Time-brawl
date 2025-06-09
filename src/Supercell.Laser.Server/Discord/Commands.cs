@@ -147,7 +147,7 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
 }
 
 
-
+// ÇALIŞMIYOR AMA İLERDE DÜZELTİRİM BENCE:d
 /*public class AddTeklifCommand : CommandModule<CommandContext>
 {
     // Tekliflerin ekleneceği dosyanın tam yolu
@@ -276,52 +276,38 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
                 + "!addgems - grant gems to a player (!addgems [TAG] [DonationCount])\n";
         }
     }
- public class SendShutdownMessage : CommandModule<CommandContext> // test edilmedi!!!
-    {
-        [Command("kapatmesaj")]
-        public static string ExecuteSendShutdownMessage([CommandParameter(Remainder = true)] string message)
-        {
-            if (string.IsNullOrEmpty(message))
-            {
-                return "Kullanım: !kapatmesaj [mesaj]";
-            }
-
-            try
-            {
-                int sentCount = 0;
-                var sessions = Sessions.ActiveSessions.Values.ToArray();
-                bool isUrgent = message.ToLower().Contains("acil") || 
-                              message.ToLower().Contains("urgent") ||
-                              message.ToLower().Contains("emergency");
-
-                foreach (var session in sessions)
-                {
-                    var shutdownMessage = new CustomShutdownMessage
-                    {
-                        Message = message,
-                        TimeLeft = isUrgent ? 30 : 60, // Acil durumda 30 saniye, normalde 60 saniye
-                        IsUrgent = isUrgent
-                    };
-
-                    session.Connection.Send(shutdownMessage);
-                    sentCount++;
-                }
 
 
-                return $"Kapatma mesajı başarıyla gönderildi.\n" +
-                       $"Mesaj: {message}\n" +
-                       $"Etkilenen Oyuncu: {sentCount}\n" +
-                       $"Durum: {(isUrgent ? "Acil" : "Normal")}\n" +
-                       $"Kalan Süre: {(isUrgent ? "30" : "60")} saniye";
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Kapatma mesajı gönderilirken hata: {ex.Message}");
-                return $"Bir hata oluştu: {ex.Message}";
-            }
-        }
+/* public class ClubRename : CommandModule<CommandContext>
+ {
+     [Command("kulüpadı")]
+     public static string RenameClub([CommandParameter] string tag, [CommandParameter] string newName)
+     {
+         if (!tag.StartsWith("#"))
+         {
+             return "Geçersiz kulüp etiketi. Lütfen '#' ile başladığından emin olun.";
+         }
 
-   public class SendCustomMessage : CommandModule<CommandContext> // test edilmedi!!!
+         long clubId = LogicLongCodeGenerator.ToId(tag);
+         Allience = Clubs.Get(clubId);
+
+         if (club == null)
+         {
+             return $"Kulüp bulunamadı: {tag}.";
+         }
+
+         club.Name = newName;
+         Clubs.Save(club);
+
+         WebhookHelper.SendNotification(
+             $"Kulüp **{tag}** adlı kulübün adı **{newName}** olarak değiştirildi."
+         );
+
+         return $"Kulüp adı başarıyla değiştirildi: {newName}";
+     }
+ }*/
+
+  public class SendCustomMessage : CommandModule<CommandContext> // test edilmedi!!!
     {
         [Command("ozelmesaj")]
         public static string ExecuteSendCustomMessage([CommandParameter(Remainder = true)] string message)
@@ -342,7 +328,7 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
                     {
                         Message = message
                     };
-                    
+
                     session.Connection.Send(customMessage);
                     sentCount++;
                 }
@@ -363,7 +349,7 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
 
 
 
-  public class UnbanIP : CommandModule<CommandContext>
+    public class UnbanIP : CommandModule<CommandContext>
     {
         [Command("unbanip")]
         public static string UnbanIpCommand([CommandParameter(Remainder = true)] string ipAddress)
@@ -414,58 +400,58 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
 
 
     public class RemovePremium : CommandModule<CommandContext>
-{
-    [Command("removepremium")]
-    public static string RemovePremiumCommand([CommandParameter(Remainder = true)] string playerId)
     {
-        string[] parts = playerId.Split(' ');
-        if (parts.Length != 1)
+        [Command("removepremium")]
+        public static string RemovePremiumCommand([CommandParameter(Remainder = true)] string playerId)
         {
-            return "Kullanım: !removepremium [ETİKET]";
-        }
-
-        long id = 0;
-        bool sc = false;
-
-        if (parts[0].StartsWith('#'))
-        {
-            id = LogicLongCodeGenerator.ToId(parts[0]);
-        }
-        else
-        {
-            sc = true;
-            if (!long.TryParse(parts[0], out id))
+            string[] parts = playerId.Split(' ');
+            if (parts.Length != 1)
             {
-                return "Geçersiz oyuncu ID formatı.";
+                return "Kullanım: !removepremium [ETİKET]";
+            }
+
+            long id = 0;
+            bool sc = false;
+
+            if (parts[0].StartsWith('#'))
+            {
+                id = LogicLongCodeGenerator.ToId(parts[0]);
+            }
+            else
+            {
+                sc = true;
+                if (!long.TryParse(parts[0], out id))
+                {
+                    return "Geçersiz oyuncu ID formatı.";
+                }
+            }
+
+            Account account = Accounts.Load(id);
+            if (account == null)
+            {
+                return $"Bu ID'ye sahip oyuncu bulunamadı: {parts[0]}.";
+            }
+
+            if (account.Home.PremiumEndTime > DateTime.UtcNow)
+            {
+                account.Home.PremiumEndTime = DateTime.MinValue; // Premium süresini sıfırla
+                account.Avatar.PremiumLevel = 0; // Premium seviyesini sıfırla
+
+                string d = sc ? LogicLongCodeGenerator.ToCode(id) : parts[0];
+
+                // Webhook bildirimi gönder
+                WebhookHelper.SendNotification(
+                    $"Oyuncu **{d}** adlı kullanıcının premium durumu kaldırıldı."
+                );
+
+                return $"Tamam: {d} için VIP durumu kaldırıldı.";
+            }
+            else
+            {
+                return $"Hata: {parts[0]} kullanıcısının zaten aktif bir VIP durumu bulunmamaktadır.";
             }
         }
-
-        Account account = Accounts.Load(id);
-        if (account == null)
-        {
-            return $"Bu ID'ye sahip oyuncu bulunamadı: {parts[0]}.";
-        }
-
-        if (account.Home.PremiumEndTime > DateTime.UtcNow)
-        {
-            account.Home.PremiumEndTime = DateTime.MinValue; // Premium süresini sıfırla
-            account.Avatar.PremiumLevel = 0; // Premium seviyesini sıfırla
-
-            string d = sc ? LogicLongCodeGenerator.ToCode(id) : parts[0];
-
-            // Webhook bildirimi gönder
-            WebhookHelper.SendNotification(
-                $"Oyuncu **{d}** adlı kullanıcının premium durumu kaldırıldı."
-            );
-
-            return $"Tamam: {d} için VIP durumu kaldırıldı.";
-        }
-        else
-        {
-            return $"Hata: {parts[0]} kullanıcısının zaten aktif bir VIP durumu bulunmamaktadır.";
-        }
     }
-}
 
 
 
@@ -552,135 +538,135 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
 
 
 
-public class LeaderboardCommand : CommandModule<CommandContext>
-{
-    [Command("liderlik")]
-    public static string ShowLeaderboard()
+    public class LeaderboardCommand : CommandModule<CommandContext>
     {
-        try
+        [Command("liderlik")]
+        public static string ShowLeaderboard()
         {
-           
-            var accounts = Accounts.GetRankingList(); // tüm hesapları çek
-
-            if (accounts == null || !accounts.Any())
+            try
             {
-                return "Veritabanında hiçbir oyuncu bulunamadı.";
+
+                var accounts = Accounts.GetRankingList(); // tüm hesapları çek
+
+                if (accounts == null || !accounts.Any())
+                {
+                    return "Veritabanında hiçbir oyuncu bulunamadı.";
+                }
+
+                // İlk 20 oyuncuyu al (butonlu sistem olsaydı 200'e kadar alabilirdik...)
+                var top20Players = accounts.Take(20).ToList();
+
+                // Liderlik tablosu metni oluştur
+                string leaderboard = "**🏆 **Liderlik Tablosu** 🏆**\n\n";
+                leaderboard += "**#**   **Oyuncu Adı**    **Kupa**    **Kulüp**\n";
+                leaderboard += "--------------------------------------\n";
+
+                for (int i = 0; i < top20Players.Count; i++)
+                {
+                    var account = top20Players[i];
+                    string allianceName = string.IsNullOrEmpty(account.Avatar.AllianceName) ? "Yok" : account.Avatar.AllianceName;
+
+                    leaderboard += $"**#{i + 1}**    {account.Avatar.Name.PadRight(15)}   {account.Avatar.Trophies.ToString().PadLeft(5)}      {allianceName}\n";
+                }
+
+                return leaderboard;
             }
-
-            // İlk 20 oyuncuyu al (butonlu sistem olsaydı 200'e kadar alabilirdik...)
-            var top20Players = accounts.Take(20).ToList();
-
-            // Liderlik tablosu metni oluştur
-            string leaderboard = "**🏆 **Liderlik Tablosu** 🏆**\n\n";
-            leaderboard += "**#**   **Oyuncu Adı**    **Kupa**    **Kulüp**\n";
-            leaderboard += "--------------------------------------\n";
-
-            for (int i = 0; i < top20Players.Count; i++)
+            catch (System.Exception ex)
             {
-                var account = top20Players[i];
-                string allianceName = string.IsNullOrEmpty(account.Avatar.AllianceName) ? "Yok" : account.Avatar.AllianceName;
-
-                leaderboard += $"**#{i + 1}**    {account.Avatar.Name.PadRight(15)}   {account.Avatar.Trophies.ToString().PadLeft(5)}      {allianceName}\n";
+                return $"Bir hata oluştu: {ex.Message}";
             }
-
-            return leaderboard;
-        }
-        catch (System.Exception ex)
-        {
-            return $"Bir hata oluştu: {ex.Message}";
         }
     }
-}
 
 
 
 
 
 
-// buyük ihtimal çalışmıyordu
+    // buyük ihtimal çalışmıyordu
 
-/*public class UnlockAll : CommandModule<CommandContext>
-{
-    [Command("unlockskins")]
-    public static string UnlockAllCommand([CommandParameter(Remainder = true)] string playerId)
+    /*public class UnlockAll : CommandModule<CommandContext>
     {
-        try
+        [Command("unlockskins")]
+        public static string UnlockAllCommand([CommandParameter(Remainder = true)] string playerId)
         {
-            // Oyuncu ID'sini kontrol et
-            if (!playerId.StartsWith("#"))
+            try
             {
-                return "Invalid player ID. Make sure it starts with '#'.";
-            }
-
-            // Oyuncu ID'sini dönüştür ve hesabı yükle
-            long id = LogicLongCodeGenerator.ToId(playerId);
-            Account account = Accounts.Load(id);
-
-            if (account == null)
-            {
-                return $"Could not find player with ID {playerId}.";
-            }
-
-            // Skin listesi tanımlanır
-            List<string> skins = new()
-            {
-                "Witch", "Rockstar", "Beach", "Pink", "Panda", "White", "Hair", "Gold", "Rudo",
-                "Bandita", "Rey", "Knight", "Caveman", "Dragon", "Summer", "Summertime",
-                "Pheonix", "Greaser", "GirlPrereg", "Box", "Santa", "Chef", "Boombox", "Wizard",
-                "Reindeer", "GalElf", "Hat", "Footbull", "Popcorn", "Hanbok", "Cny", "Valentine",
-                "WarsBox", "Nightwitch", "Cart", "Shiba", "GalBunny", "Ms", "GirlHotrod", "Maple",
-                "RR", "Mecha", "MechaWhite", "MechaNight", "FootbullBlue", "Outlaw", "Hogrider",
-                "BoosterDefault", "Shark", "HoleBlue", "BoxMoonFestival", "WizardRed", "Pirate",
-                "GirlWitch", "KnightDark", "DragonDark", "DJ", "Wolf", "Brown", "Total", "Sally",
-                "Leonard", "SantaRope", "Gift", "GT", "Virus", "BoosterVirus", "Gamer", "Valentines",
-                "Koala", "BearKoala", "AgentP", "Football", "Arena", "Tanuki", "Horus", "ArenaPSG",
-                "DarkBunny", "College", "Bazaar", "RedDragon", "Constructor", "Hawaii", "Barbking",
-                "Trader", "StationSummer", "Silver", "Bank", "Retro", "Ranger", "Tracksuit", "Knight",
-                "RetroAddon"
-            };
-
-            // Karakterlerin skinlerini aç
-            foreach (Hero hero in account.Avatar.Heroes)
-            {
-                CharacterData characterData = DataTables
-                    .Get(DataType.Character)
-                    .GetDataByGlobalId<CharacterData>(hero.CharacterId);
-
-                if (characterData != null)
+                // Oyuncu ID'sini kontrol et
+                if (!playerId.StartsWith("#"))
                 {
-                    foreach (string skinName in skins)
-                    {
-                        SkinData skinData = DataTables
-                            .Get(DataType.Skin)
-                            .GetData<SkinData>(characterData.Name + skinName);
+                    return "Invalid player ID. Make sure it starts with '#'.";
+                }
 
-                        if (skinData != null && !account.Home.UnlockedSkins.Contains(skinData.GetGlobalId()))
+                // Oyuncu ID'sini dönüştür ve hesabı yükle
+                long id = LogicLongCodeGenerator.ToId(playerId);
+                Account account = Accounts.Load(id);
+
+                if (account == null)
+                {
+                    return $"Could not find player with ID {playerId}.";
+                }
+
+                // Skin listesi tanımlanır
+                List<string> skins = new()
+                {
+                    "Witch", "Rockstar", "Beach", "Pink", "Panda", "White", "Hair", "Gold", "Rudo",
+                    "Bandita", "Rey", "Knight", "Caveman", "Dragon", "Summer", "Summertime",
+                    "Pheonix", "Greaser", "GirlPrereg", "Box", "Santa", "Chef", "Boombox", "Wizard",
+                    "Reindeer", "GalElf", "Hat", "Footbull", "Popcorn", "Hanbok", "Cny", "Valentine",
+                    "WarsBox", "Nightwitch", "Cart", "Shiba", "GalBunny", "Ms", "GirlHotrod", "Maple",
+                    "RR", "Mecha", "MechaWhite", "MechaNight", "FootbullBlue", "Outlaw", "Hogrider",
+                    "BoosterDefault", "Shark", "HoleBlue", "BoxMoonFestival", "WizardRed", "Pirate",
+                    "GirlWitch", "KnightDark", "DragonDark", "DJ", "Wolf", "Brown", "Total", "Sally",
+                    "Leonard", "SantaRope", "Gift", "GT", "Virus", "BoosterVirus", "Gamer", "Valentines",
+                    "Koala", "BearKoala", "AgentP", "Football", "Arena", "Tanuki", "Horus", "ArenaPSG",
+                    "DarkBunny", "College", "Bazaar", "RedDragon", "Constructor", "Hawaii", "Barbking",
+                    "Trader", "StationSummer", "Silver", "Bank", "Retro", "Ranger", "Tracksuit", "Knight",
+                    "RetroAddon"
+                };
+
+                // Karakterlerin skinlerini aç
+                foreach (Hero hero in account.Avatar.Heroes)
+                {
+                    CharacterData characterData = DataTables
+                        .Get(DataType.Character)
+                        .GetDataByGlobalId<CharacterData>(hero.CharacterId);
+
+                    if (characterData != null)
+                    {
+                        foreach (string skinName in skins)
                         {
-                            account.Home.UnlockedSkins.Add(skinData.GetGlobalId());
+                            SkinData skinData = DataTables
+                                .Get(DataType.Skin)
+                                .GetData<SkinData>(characterData.Name + skinName);
+
+                            if (skinData != null && !account.Home.UnlockedSkins.Contains(skinData.GetGlobalId()))
+                            {
+                                account.Home.UnlockedSkins.Add(skinData.GetGlobalId());
+                            }
                         }
                     }
                 }
-            }
 
-            // Oturum kontrolü ve kullanıcıya bildirim
-            if (Sessions.IsSessionActive(id))
-            {
-                var session = Sessions.GetSession(id);
-                session.GameListener.SendTCPMessage(new AuthenticationFailedMessage
+                // Oturum kontrolü ve kullanıcıya bildirim
+                if (Sessions.IsSessionActive(id))
                 {
-                    Message = "hesabında tüm kostümler açıldı! iyi oyunlar!"
-                });
-                Sessions.Remove(id);
+                    var session = Sessions.GetSession(id);
+                    session.GameListener.SendTCPMessage(new AuthenticationFailedMessage
+                    {
+                        Message = "hesabında tüm kostümler açıldı! iyi oyunlar!"
+                    });
+                    Sessions.Remove(id);
+                }
+
+                return $" {playerId} ID'li oyuncunun hesabına tüm kostümler verildi";
             }
-
-            return $" {playerId} ID'li oyuncunun hesabına tüm kostümler verildi";
+            catch (Exception ex)
+            {
+                return $"An error occurred while processing: {ex.Message}";
+            }
         }
-        catch (Exception ex)
-        {
-            return $"An error occurred while processing: {ex.Message}";
-        }
-    }
-}*/
+    }*/
 
 
 
@@ -688,112 +674,112 @@ public class LeaderboardCommand : CommandModule<CommandContext>
 
 
 
-//public class Unlockskins : CommandModule<CommandContext>
-//{
-  //  [Command("giveskin")]
+    //public class Unlockskins : CommandModule<CommandContext>
+    //{
+    //  [Command("giveskin")]
     //public static string UnlockSkinCommand([CommandParameter] string playerId, [CommandParameter] int skinIndex)
     //{
-      //  try
-       // {
-            // Oyuncu ID'sini kontrol et
-        //    if (!playerId.StartsWith("#"))
-         //   {
-          //      return "Invalid player ID. Make sure it starts with '#'.";
-           // }
+    //  try
+    // {
+    // Oyuncu ID'sini kontrol et
+    //    if (!playerId.StartsWith("#"))
+    //   {
+    //      return "Invalid player ID. Make sure it starts with '#'.";
+    // }
 
-            // Oyuncu ID'sini dönüştür ve hesabı yükle
-         //   long id = LogicLongCodeGenerator.ToId(playerId);
-          //  Account account = Accounts.Load(id);
+    // Oyuncu ID'sini dönüştür ve hesabı yükle
+    //   long id = LogicLongCodeGenerator.ToId(playerId);
+    //  Account account = Accounts.Load(id);
 
-           // if (account == null)
-         //   {
-           //     return $"Could not find player with ID {playerId}.";
-           // }
+    // if (account == null)
+    //   {
+    //     return $"Could not find player with ID {playerId}.";
+    // }
 
-            // Skins ID dosyasını yükle
-          //  string filePath = "skinsid.txt"; // Dosya yolu
-           // if (!File.Exists(filePath))
-          //  {
-            //    return $"The file '{filePath}' could not be found.";
-           // }
+    // Skins ID dosyasını yükle
+    //  string filePath = "skinsid.txt"; // Dosya yolu
+    // if (!File.Exists(filePath))
+    //  {
+    //    return $"The file '{filePath}' could not be found.";
+    // }
 
-            // Dosyadaki skinleri yükle
-      //      List<string> skinList = new();
-        //    foreach (string line in File.ReadAllLines(filePath))
-          //  {
-            //    if (string.IsNullOrWhiteSpace(line) || !line.Contains("=")) continue;
+    // Dosyadaki skinleri yükle
+    //      List<string> skinList = new();
+    //    foreach (string line in File.ReadAllLines(filePath))
+    //  {
+    //    if (string.IsNullOrWhiteSpace(line) || !line.Contains("=")) continue;
 
-              //  string[] parts = line.Split('=');
-            //    if (parts.Length == 2)
-              //  {
-                //    string skinName = parts[1].Trim();
-                  //  skinList.Add(skinName);
-             //   }
-           // }
+    //  string[] parts = line.Split('=');
+    //    if (parts.Length == 2)
+    //  {
+    //    string skinName = parts[1].Trim();
+    //  skinList.Add(skinName);
+    //   }
+    // }
 
-           // if (skinList.Count < skinIndex || skinIndex <= 0)
-          //  {
-           ////     return $"Skin index {skinIndex} is out of range. Valid indexes are 1-{skinList.Count}.";
-            //}
+    // if (skinList.Count < skinIndex || skinIndex <= 0)
+    //  {
+    ////     return $"Skin index {skinIndex} is out of range. Valid indexes are 1-{skinList.Count}.";
+    //}
 
-            // İstenilen skin'i aç
-        //    string selectedSkin = skinList[skinIndex - 1]; // skinIndex 1'den başladığı için -1 yapıyoruz
+    // İstenilen skin'i aç
+    //    string selectedSkin = skinList[skinIndex - 1]; // skinIndex 1'den başladığı için -1 yapıyoruz
 
-          //  foreach (Hero hero in account.Avatar.Heroes)
-           // {
-             //   CharacterData characterData = DataTables
-               //     .Get(DataType.Character)
-                 //   .GetDataByGlobalId<CharacterData>(hero.CharacterId);
-//
-  //              if (characterData != null)
+    //  foreach (Hero hero in account.Avatar.Heroes)
+    // {
+    //   CharacterData characterData = DataTables
+    //     .Get(DataType.Character)
+    //   .GetDataByGlobalId<CharacterData>(hero.CharacterId);
+    //
+    //              if (characterData != null)
     //            {
-      //              SkinData skinData = DataTables
-        //                .Get(DataType.Skin)
-          //////              .GetData<SkinData>(characterData.Name + selectedSkin);
+    //              SkinData skinData = DataTables
+    //                .Get(DataType.Skin)
+    //////              .GetData<SkinData>(characterData.Name + selectedSkin);
 
-                //    if (skinData != null)
-                  ////  {
-                      //  Console.WriteLine($"Trying to unlock skin: {selectedSkin}, Skin ID: {skinData.GetGlobalId()}");
+    //    if (skinData != null)
+    ////  {
+    //  Console.WriteLine($"Trying to unlock skin: {selectedSkin}, Skin ID: {skinData.GetGlobalId()}");
 
-                        //if (!account.Home.UnlockedSkins.Contains(skinData.GetGlobalId()))
-                     //   {
-            //                account.Home.UnlockedSkins.Add(skinData.GetGlobalId());
-              //              Console.WriteLine($"Skin added to UnlockedSkins list: {skinData.GetGlobalId()}");
+    //if (!account.Home.UnlockedSkins.Contains(skinData.GetGlobalId()))
+    //   {
+    //                account.Home.UnlockedSkins.Add(skinData.GetGlobalId());
+    //              Console.WriteLine($"Skin added to UnlockedSkins list: {skinData.GetGlobalId()}");
 
-                            // Hesap kaydet
-                //            account.Save();
-                  ////      }
-                      //  else
-                    //    {
-                      //      Console.WriteLine($"Skin already unlocked: {selectedSkin}");
-                    //    }
-                  //  }
-         //           else
-           //         {
-             //           Console.WriteLine($"Skin not found for {characterData.Name} + {selectedSkin}");
-               //     }
-           //     }
-       //     }
+    // Hesap kaydet
+    //            account.Save();
+    ////      }
+    //  else
+    //    {
+    //      Console.WriteLine($"Skin already unlocked: {selectedSkin}");
+    //    }
+    //  }
+    //           else
+    //         {
+    //           Console.WriteLine($"Skin not found for {characterData.Name} + {selectedSkin}");
+    //     }
+    //     }
+    //     }
 
-            // Oturum kontrolü ve kullanıcıya bildirim
-         //   if (Sessions.IsSessionActive(id))
-        //    {
-           //     var session = Sessions.GetSession(id);
-          //      session.GameListener.SendTCPMessage(new AuthenticationFailedMessage
-              //  {
-            //        Message = $"Tebrikler! '{selectedSkin}' kostümü açıldı!"
-                //});
-         //       Sessions.Remove(id);
-           // }
+    // Oturum kontrolü ve kullanıcıya bildirim
+    //   if (Sessions.IsSessionActive(id))
+    //    {
+    //     var session = Sessions.GetSession(id);
+    //      session.GameListener.SendTCPMessage(new AuthenticationFailedMessage
+    //  {
+    //        Message = $"Tebrikler! '{selectedSkin}' kostümü açıldı!"
+    //});
+    //       Sessions.Remove(id);
+    // }
 
-           // r//eturn $"{playerId} ID'li oyuncuya '{selectedSkin}' kostümü başarıyla eklendi.";
-       // }
-     //   catch (Exception ex)
-     //   {
-       //     return $"An error occurred while processing: {ex.Message}";
-     //   }
- //   }
-//}
+    // r//eturn $"{playerId} ID'li oyuncuya '{selectedSkin}' kostümü başarıyla eklendi.";
+    // }
+    //   catch (Exception ex)
+    //   {
+    //     return $"An error occurred while processing: {ex.Message}";
+    //   }
+    //   }
+    //}
 
 
 
@@ -837,9 +823,9 @@ public class LeaderboardCommand : CommandModule<CommandContext>
             Accounts.Save(account);
 
 
-               WebhookHelper.SendNotification(
-            $"Oyuncu **{tag}**  adlı kullanıcının adı **{newName}** olarak değiştirildi. "
-        );
+            WebhookHelper.SendNotification(
+         $"Oyuncu **{tag}**  adlı kullanıcının adı **{newName}** olarak değiştirildi. "
+     );
 
             return $"Başarılı: {tag} için isim başarıyla değiştirildi. Yeni isim: {newName}";
         }
@@ -851,345 +837,345 @@ public class LeaderboardCommand : CommandModule<CommandContext>
 
 
     public class RemoveGems : CommandModule<CommandContext>
-        {
-            [Command("removegems")]
-            public static string RemoveGemsCommand([CommandParameter(Remainder = true)] string playerIdAndAmount)
-            {
-                string[] parts = playerIdAndAmount.Split(' ');
-                if (parts.Length != 2 || !parts[0].StartsWith("#") || !int.TryParse(parts[1], out int removalAmount))
-                {
-                    return "Usage: !removegems [TAG] [kaldırılcak elmas sayısı]";
-                }
-
-                long lowID = LogicLongCodeGenerator.ToId(parts[0]);
-                Account account = Accounts.Load(lowID);
-
-                if (account == null)
-                {
-                    return $"Could not find player with ID {parts[0]}.";
-                }
-
-                if (account.Avatar.Diamonds < removalAmount)
-                {
-                    return $"{parts[0]} oyuncusunun {removalAmount}'ı kaldırmaya yetecek kadar taşı yok.";
-                }
-
-                account.Avatar.Diamonds -= removalAmount;
-               
-                    WebhookHelper.SendNotification(
-            $"{parts[0]} kimliğine sahip oyuncudan {removalAmount} değerli taş kaldırıldı. Artık ellerinde {account.Avatar.Diamonds} mücevher kaldı."
-        );
-                return $"{parts[0]} kimliğine sahip oyuncudan {removalAmount} değerli taş kaldırıldı. Artık ellerinde {account.Avatar.Diamonds} mücevher kaldı.";
-            }
-        }
-
-
-
-
-
-
-
-
-        public class AddGems : CommandModule<CommandContext>
-{
-    [Command("addgems")]
-    public static string AddGemsWithWebhook([CommandParameter(Remainder = true)] string playerIdAndAmount)
     {
-        string[] parts = playerIdAndAmount.Split(' ');
-        if (
-            parts.Length != 2
-            || !parts[0].StartsWith("#")
-            || !int.TryParse(parts[1], out int donationAmount)
+        [Command("removegems")]
+        public static string RemoveGemsCommand([CommandParameter(Remainder = true)] string playerIdAndAmount)
+        {
+            string[] parts = playerIdAndAmount.Split(' ');
+            if (parts.Length != 2 || !parts[0].StartsWith("#") || !int.TryParse(parts[1], out int removalAmount))
+            {
+                return "Usage: !removegems [TAG] [kaldırılcak elmas sayısı]";
+            }
+
+            long lowID = LogicLongCodeGenerator.ToId(parts[0]);
+            Account account = Accounts.Load(lowID);
+
+            if (account == null)
+            {
+                return $"Could not find player with ID {parts[0]}.";
+            }
+
+            if (account.Avatar.Diamonds < removalAmount)
+            {
+                return $"{parts[0]} oyuncusunun {removalAmount}'ı kaldırmaya yetecek kadar taşı yok.";
+            }
+
+            account.Avatar.Diamonds -= removalAmount;
+
+            WebhookHelper.SendNotification(
+    $"{parts[0]} kimliğine sahip oyuncudan {removalAmount} değerli taş kaldırıldı. Artık ellerinde {account.Avatar.Diamonds} mücevher kaldı."
+);
+            return $"{parts[0]} kimliğine sahip oyuncudan {removalAmount} değerli taş kaldırıldı. Artık ellerinde {account.Avatar.Diamonds} mücevher kaldı.";
+        }
+    }
+
+
+
+
+
+
+
+
+    public class AddGems : CommandModule<CommandContext>
+    {
+        [Command("addgems")]
+        public static string AddGemsWithWebhook([CommandParameter(Remainder = true)] string playerIdAndAmount)
+        {
+            string[] parts = playerIdAndAmount.Split(' ');
+            if (
+                parts.Length != 2
+                || !parts[0].StartsWith("#")
+                || !int.TryParse(parts[1], out int donationAmount)
+            )
+            {
+                return "Usage: !addgems [TAG] [DonationCount]";
+            }
+
+            long lowID = LogicLongCodeGenerator.ToId(parts[0]);
+            Account account = Accounts.Load(lowID);
+
+            if (account == null)
+            {
+                return $"Could not find player with ID {parts[0]}.";
+            }
+
+            // Değerli taş ekleme işlemi
+            account.Avatar.Diamonds += donationAmount; // Elmasları ekliyoruz
+            Notification nGems = new Notification
+            {
+                Id = 89,
+                DonationCount = donationAmount,
+                MessageEntry = $"<c6>{donationAmount} değerli taş aldınız, tadını çıkarın! </c>"
+            };
+            account.Home.NotificationFactory.Add(nGems);
+            LogicAddNotificationCommand acmGems = new() { Notification = nGems };
+            AvailableServerCommandMessage asmGems = new AvailableServerCommandMessage
+            {
+                Command = acmGems
+            };
+
+            if (Sessions.IsSessionActive(lowID))
+            {
+                var sessionGems = Sessions.GetSession(lowID);
+                sessionGems.GameListener.SendTCPMessage(asmGems);
+            }
+
+            // Webhook ile bildirim gönderimi
+            WebhookHelper.SendNotification(
+                $"Oyuncu **{account.Avatar.Name}** (ID: {parts[0]}) adlı kullanıcıya {donationAmount} değerli taş eklendi! Artık toplam elmas: {account.Avatar.Diamonds}."
+            );
+
+            return $"Oyuncu {parts[0]}'ya {donationAmount} değerli taş eklendi. Artık toplamda {account.Avatar.Diamonds} değerli taşı var.";
+        }
+    }
+
+
+    public class SetTrophies : CommandModule<CommandContext>
+    {
+        [Command("settrophies")]
+        public static string settrophies(
+            [CommandParameter(Remainder = true)] string playerIdAndTrophyCount
         )
         {
-            return "Usage: !addgems [TAG] [DonationCount]";
-        }
-
-        long lowID = LogicLongCodeGenerator.ToId(parts[0]);
-        Account account = Accounts.Load(lowID);
-
-        if (account == null)
-        {
-            return $"Could not find player with ID {parts[0]}.";
-        }
-
-        // Değerli taş ekleme işlemi
-        account.Avatar.Diamonds += donationAmount; // Elmasları ekliyoruz
-        Notification nGems = new Notification
-        {
-            Id = 89,
-            DonationCount = donationAmount,
-            MessageEntry = $"<c6>{donationAmount} değerli taş aldınız, tadını çıkarın! </c>"
-        };
-        account.Home.NotificationFactory.Add(nGems);
-        LogicAddNotificationCommand acmGems = new() { Notification = nGems };
-        AvailableServerCommandMessage asmGems = new AvailableServerCommandMessage
-        {
-            Command = acmGems
-        };
-
-        if (Sessions.IsSessionActive(lowID))
-        {
-            var sessionGems = Sessions.GetSession(lowID);
-            sessionGems.GameListener.SendTCPMessage(asmGems);
-        }
-
-        // Webhook ile bildirim gönderimi
-        WebhookHelper.SendNotification(
-            $"Oyuncu **{account.Avatar.Name}** (ID: {parts[0]}) adlı kullanıcıya {donationAmount} değerli taş eklendi! Artık toplam elmas: {account.Avatar.Diamonds}."
-        );
-
-        return $"Oyuncu {parts[0]}'ya {donationAmount} değerli taş eklendi. Artık toplamda {account.Avatar.Diamonds} değerli taşı var.";
-    }
-}
-
-
-        public class SetTrophies : CommandModule<CommandContext> 
-        {
-            [Command("settrophies")]
-            public static string settrophies(
-                [CommandParameter(Remainder = true)] string playerIdAndTrophyCount
+            string[] parts = playerIdAndTrophyCount.Split(' ');
+            if (
+                parts.Length != 2
+                || !parts[0].StartsWith("#")
+                || !int.TryParse(parts[1], out int trophyCount)
             )
             {
-                string[] parts = playerIdAndTrophyCount.Split(' ');
-                if (
-                    parts.Length != 2
-                    || !parts[0].StartsWith("#")
-                    || !int.TryParse(parts[1], out int trophyCount)
-                )
-                {
-                    return "Usage: !settrophies [TAG] [amount]";
-                }
-
-                long lowID = LogicLongCodeGenerator.ToId(parts[0]);
-                Account account = Accounts.Load(lowID);
-
-                if (account == null)
-                {
-                    return $"Could not find player with ID {parts[0]}.";
-                }
-
-                account.Avatar.SetTrophies(trophyCount);
-
-                if (Sessions.IsSessionActive(lowID))
-                {
-                    var session = Sessions.GetSession(lowID);
-                    session.GameListener.SendTCPMessage(
-                        new AuthenticationFailedMessage()
-                        {
-                            Message =
-                                $"Hesabınız güncellendi! Artık dövüşçülerinizin her birinde {trophyCount} kupa var!"
-                        }
-                    );
-                    Sessions.Remove(lowID);
-                }
-   WebhookHelper.SendNotification(
-            $"{parts[0]} kimliğine sahip oyuncular için her dövüşçüye {trophyCount} kupa ayarlandı "
-        );
-                return $"{parts[0]} kimliğine sahip oyuncular için her dövüşçüye {trophyCount} kupa ayarlayın.";
+                return "Usage: !settrophies [TAG] [amount]";
             }
-        }
 
+            long lowID = LogicLongCodeGenerator.ToId(parts[0]);
+            Account account = Accounts.Load(lowID);
 
-
-
-
-
-
-
-
-        public class AddTrophies : CommandModule<CommandContext> // set ile arasındaki fark, bu komut mevcut kupalara ekleme yapar diğeri girilen değerli kupayı tüm dövüşçülere ekler
-        {
-            [Command("addtrophies")]
-            public static string addtrophies(
-                [CommandParameter(Remainder = true)] string playerIdAndTrophyCount
-            )
+            if (account == null)
             {
-                string[] parts = playerIdAndTrophyCount.Split(' ');
-                if (
-                    parts.Length != 2
-                    || !parts[0].StartsWith("#")
-                    || !int.TryParse(parts[1], out int trophyCountToAdd)
-                )
-                {
-                    return "Usage: !addtrophies [TAG] [amount]";
-                }
-
-                long lowID = LogicLongCodeGenerator.ToId(parts[0]);
-                Account account = Accounts.Load(lowID);
-
-                if (account == null)
-                {
-                    return $"Could not find player with ID {parts[0]}.";
-                }
-
-                // Current trophies are fetched using a property or direct field.
-                int currentTrophies = account.Avatar.Trophies; // Assuming Trophies is a property or field
-                int newTrophyCount = currentTrophies + trophyCountToAdd;
-                account.Avatar.SetTrophies(newTrophyCount);
-
-                if (Sessions.IsSessionActive(lowID))
-                {
-                    var session = Sessions.GetSession(lowID);
-                    session.GameListener.SendTCPMessage(
-                        new AuthenticationFailedMessage()
-                        {
-                            Message =
-                                $"Hesabınız güncellendi! Artık tüm dövüşçülerinizde {newTrophyCount} kupa var!"
-                        }
-                    );
-                    Sessions.Remove(lowID);
-                }
-                   WebhookHelper.SendNotification(
-            $"{parts[0]} kimliğine sahip oyuncuya {trophyCountToAdd} kupa eklendi. Yeni toplam {newTrophyCount} kupa."
-        );
-
-                return $"{parts[0]} kimliğine sahip oyuncuya {trophyCountToAdd} kupa eklendi. Yeni toplam {newTrophyCount} kupa.";
+                return $"Could not find player with ID {parts[0]}.";
             }
-        }
 
+            account.Avatar.SetTrophies(trophyCount);
 
-
-
-
-
-
-
-        public class GivePremium : CommandModule<CommandContext>
-        {
-            [Command("givepremium")]
-            public static string GivePremiumCommand(
-                [CommandParameter(Remainder = true)] string playerId
-            )
+            if (Sessions.IsSessionActive(lowID))
             {
-                string[] parts = playerId.Split(' ');
-                if (parts.Length != 1)
-                {
-                    return "Usage: !givepremium [TAG]";
-                }
-
-                long id = 0;
-                bool sc = false;
-
-                if (parts[0].StartsWith('#'))
-                {
-                    id = LogicLongCodeGenerator.ToId(parts[0]);
-                }
-                else
-                {
-                    sc = true;
-                    if (!long.TryParse(parts[0], out id))
+                var session = Sessions.GetSession(lowID);
+                session.GameListener.SendTCPMessage(
+                    new AuthenticationFailedMessage()
                     {
-                        return "Invalid player ID format.";
+                        Message =
+                            $"Hesabınız güncellendi! Artık dövüşçülerinizin her birinde {trophyCount} kupa var!"
                     }
-                }
-
-                Account account = Accounts.Load(id);
-                if (account == null)
-                {
-                    return $"Could not find player with ID {parts[0]}.";
-                }
-
-                if (account.Home.PremiumEndTime < DateTime.UtcNow)
-                {
-                    account.Home.PremiumEndTime = DateTime.UtcNow.AddMonths(1);
-                }
-                else
-                {
-                    account.Home.PremiumEndTime = account.Home.PremiumEndTime.AddMonths(1);
-                }
-
-                account.Avatar.PremiumLevel = 1;
-
-                string formattedDate = account.Home.PremiumEndTime.ToString("dd'th of' MMMM yyyy");
-
-                Notification n = new Notification
-                {
-                    Id = 89,
-                    DonationCount = 200,
-                    MessageEntry =
-                        $"<c6>VIP durumu etkinleştirildi/uzatıldı {account.Home.PremiumEndTime} UTC! ({formattedDate})</c>"
-                };
-
-                account.Home.NotificationFactory.Add(n);
-
-                LogicAddNotificationCommand acm = new LogicAddNotificationCommand { Notification = n };
-
-                AvailableServerCommandMessage asm = new AvailableServerCommandMessage { Command = acm };
-
-                if (Sessions.IsSessionActive(id))
-                {
-                    var session = Sessions.GetSession(id);
-                    session.GameListener.SendTCPMessage(asm);
-                }
-                 string d = sc ? LogicLongCodeGenerator.ToCode(id) : parts[0];
-
-                   WebhookHelper.SendNotification(
-           $" {d} için VIP durumunu ayarla etkinleştirildi/uzatıldı {account.Home.PremiumEndTime} UTC! ({formattedDate})"
-        );
-
-                return $"tamam {d} için VIP durumunu ayarla etkinleştirildi/uzatıldı {account.Home.PremiumEndTime} UTC! ({formattedDate})";
-            }
-        }
-
-        public class ChangeUserCredentials : CommandModule<CommandContext>
-        {
-            [Command("iddegis")] // database'de değişiklik yapar
-            public static string ChangeUserCredentialsCommand(
-                [CommandParameter(Remainder = true)] string input
-            )
-            {
-                string[] parts = input.Split(' ');
-                if (parts.Length != 3)
-                {
-                    return "Usage: !changecredentials [TAG] [newUsername] [newPassword]";
-                }
-
-                long id = 0;
-                bool sc = false;
-
-                if (parts[0].StartsWith('#'))
-                {
-                    id = LogicLongCodeGenerator.ToId(parts[0]);
-                }
-                else
-                {
-                    sc = true;
-                    if (!long.TryParse(parts[0], out id))
-                    {
-                        return "Invalid player ID format.";
-                    }
-                }
-
-                Account account = Accounts.Load(id);
-                if (account == null)
-                {
-                    return $"Could not find player with ID {parts[0]}.";
-                }
-
-                string newUsername = parts[1];
-                string newPassword = parts[2];
-
-                bool success = DatabaseHelper.ExecuteNonQuery(
-                    "UPDATE users SET username = @username, password = @password WHERE id = @id",
-                    ("@username", newUsername),
-                    ("@password", newPassword),
-                    ("@id", id)
                 );
-
-                if (!success)
-                {
-                    return $"Failed to update credentials for player with ID {parts[0]}.";
-                }
-                 string d = sc ? LogicLongCodeGenerator.ToCode(id) : parts[0];
-
-
-                    WebhookHelper.SendNotification(
-           $"{d} için kimlik bilgileri güncellendi: Kullanıcı Adı = {newUsername}, Şifre = {newPassword}"
-        );
-                return $"{d} için kimlik bilgileri güncellendi: Kullanıcı Adı = {newUsername}, Şifre = {newPassword}";
+                Sessions.Remove(lowID);
             }
+            WebhookHelper.SendNotification(
+                     $"{parts[0]} kimliğine sahip oyuncular için her dövüşçüye {trophyCount} kupa ayarlandı "
+                 );
+            return $"{parts[0]} kimliğine sahip oyuncular için her dövüşçüye {trophyCount} kupa ayarlayın.";
         }
+    }
+
+
+
+
+
+
+
+
+
+    public class AddTrophies : CommandModule<CommandContext> // set ile arasındaki fark, bu komut mevcut kupalara ekleme yapar diğeri girilen değerli kupayı tüm dövüşçülere ekler
+    {
+        [Command("addtrophies")]
+        public static string addtrophies(
+            [CommandParameter(Remainder = true)] string playerIdAndTrophyCount
+        )
+        {
+            string[] parts = playerIdAndTrophyCount.Split(' ');
+            if (
+                parts.Length != 2
+                || !parts[0].StartsWith("#")
+                || !int.TryParse(parts[1], out int trophyCountToAdd)
+            )
+            {
+                return "Usage: !addtrophies [TAG] [amount]";
+            }
+
+            long lowID = LogicLongCodeGenerator.ToId(parts[0]);
+            Account account = Accounts.Load(lowID);
+
+            if (account == null)
+            {
+                return $"Could not find player with ID {parts[0]}.";
+            }
+
+            // Current trophies are fetched using a property or direct field.
+            int currentTrophies = account.Avatar.Trophies; // Assuming Trophies is a property or field
+            int newTrophyCount = currentTrophies + trophyCountToAdd;
+            account.Avatar.SetTrophies(newTrophyCount);
+
+            if (Sessions.IsSessionActive(lowID))
+            {
+                var session = Sessions.GetSession(lowID);
+                session.GameListener.SendTCPMessage(
+                    new AuthenticationFailedMessage()
+                    {
+                        Message =
+                            $"Hesabınız güncellendi! Artık tüm dövüşçülerinizde {newTrophyCount} kupa var!"
+                    }
+                );
+                Sessions.Remove(lowID);
+            }
+            WebhookHelper.SendNotification(
+     $"{parts[0]} kimliğine sahip oyuncuya {trophyCountToAdd} kupa eklendi. Yeni toplam {newTrophyCount} kupa."
+ );
+
+            return $"{parts[0]} kimliğine sahip oyuncuya {trophyCountToAdd} kupa eklendi. Yeni toplam {newTrophyCount} kupa.";
+        }
+    }
+
+
+
+
+
+
+
+
+    public class GivePremium : CommandModule<CommandContext>
+    {
+        [Command("givepremium")]
+        public static string GivePremiumCommand(
+            [CommandParameter(Remainder = true)] string playerId
+        )
+        {
+            string[] parts = playerId.Split(' ');
+            if (parts.Length != 1)
+            {
+                return "Usage: !givepremium [TAG]";
+            }
+
+            long id = 0;
+            bool sc = false;
+
+            if (parts[0].StartsWith('#'))
+            {
+                id = LogicLongCodeGenerator.ToId(parts[0]);
+            }
+            else
+            {
+                sc = true;
+                if (!long.TryParse(parts[0], out id))
+                {
+                    return "Invalid player ID format.";
+                }
+            }
+
+            Account account = Accounts.Load(id);
+            if (account == null)
+            {
+                return $"Could not find player with ID {parts[0]}.";
+            }
+
+            if (account.Home.PremiumEndTime < DateTime.UtcNow)
+            {
+                account.Home.PremiumEndTime = DateTime.UtcNow.AddMonths(1);
+            }
+            else
+            {
+                account.Home.PremiumEndTime = account.Home.PremiumEndTime.AddMonths(1);
+            }
+
+            account.Avatar.PremiumLevel = 1;
+
+            string formattedDate = account.Home.PremiumEndTime.ToString("dd'th of' MMMM yyyy");
+
+            Notification n = new Notification
+            {
+                Id = 89,
+                DonationCount = 200,
+                MessageEntry =
+                    $"<c6>VIP durumu etkinleştirildi/uzatıldı {account.Home.PremiumEndTime} UTC! ({formattedDate})</c>"
+            };
+
+            account.Home.NotificationFactory.Add(n);
+
+            LogicAddNotificationCommand acm = new LogicAddNotificationCommand { Notification = n };
+
+            AvailableServerCommandMessage asm = new AvailableServerCommandMessage { Command = acm };
+
+            if (Sessions.IsSessionActive(id))
+            {
+                var session = Sessions.GetSession(id);
+                session.GameListener.SendTCPMessage(asm);
+            }
+            string d = sc ? LogicLongCodeGenerator.ToCode(id) : parts[0];
+
+            WebhookHelper.SendNotification(
+    $" {d} için VIP durumunu ayarla etkinleştirildi/uzatıldı {account.Home.PremiumEndTime} UTC! ({formattedDate})"
+ );
+
+            return $"tamam {d} için VIP durumunu ayarla etkinleştirildi/uzatıldı {account.Home.PremiumEndTime} UTC! ({formattedDate})";
+        }
+    }
+
+    public class ChangeUserCredentials : CommandModule<CommandContext>
+    {
+        [Command("iddegis")] // database'de değişiklik yapar
+        public static string ChangeUserCredentialsCommand(
+            [CommandParameter(Remainder = true)] string input
+        )
+        {
+            string[] parts = input.Split(' ');
+            if (parts.Length != 3)
+            {
+                return "Usage: !changecredentials [TAG] [newUsername] [newPassword]";
+            }
+
+            long id = 0;
+            bool sc = false;
+
+            if (parts[0].StartsWith('#'))
+            {
+                id = LogicLongCodeGenerator.ToId(parts[0]);
+            }
+            else
+            {
+                sc = true;
+                if (!long.TryParse(parts[0], out id))
+                {
+                    return "Invalid player ID format.";
+                }
+            }
+
+            Account account = Accounts.Load(id);
+            if (account == null)
+            {
+                return $"Could not find player with ID {parts[0]}.";
+            }
+
+            string newUsername = parts[1];
+            string newPassword = parts[2];
+
+            bool success = DatabaseHelper.ExecuteNonQuery(
+                "UPDATE users SET username = @username, password = @password WHERE id = @id",
+                ("@username", newUsername),
+                ("@password", newPassword),
+                ("@id", id)
+            );
+
+            if (!success)
+            {
+                return $"Failed to update credentials for player with ID {parts[0]}.";
+            }
+            string d = sc ? LogicLongCodeGenerator.ToCode(id) : parts[0];
+
+
+            WebhookHelper.SendNotification(
+   $"{d} için kimlik bilgileri güncellendi: Kullanıcı Adı = {newUsername}, Şifre = {newPassword}"
+);
+            return $"{d} için kimlik bilgileri güncellendi: Kullanıcı Adı = {newUsername}, Şifre = {newPassword}";
+        }
+    }
 
 
 
@@ -1203,7 +1189,7 @@ public class LeaderboardCommand : CommandModule<CommandContext>
             {
                 return "Invalid player ID. Make sure it starts with '#'.";
             }
-            
+
             long lowID = LogicLongCodeGenerator.ToId(playerId);
             Account account = Accounts.Load(lowID);
 
@@ -1224,18 +1210,18 @@ public class LeaderboardCommand : CommandModule<CommandContext>
                 Sessions.Remove(lowID);
             }
 
-             WebhookHelper.SendNotification(
-            $"Oyuncu **{playerId}**  adlı kullanıcı  banlandı. "
-        );
+            WebhookHelper.SendNotification(
+           $"Oyuncu **{playerId}**  adlı kullanıcı  banlandı. "
+       );
 
 
             return $"{playerId} kimliğine sahip oyuncu yasaklandı.";
         }
-    
+
     }
 
 
-   
+
     public class Unban : CommandModule<CommandContext>
     {
         [Command("unban")]
@@ -1264,9 +1250,9 @@ public class LeaderboardCommand : CommandModule<CommandContext>
                 );
                 Sessions.Remove(lowID);
             }
-   WebhookHelper.SendNotification(
-            $"Oyuncu **{playerId}**  adlı kullanıcı  banı kaldırıldı. "
-        );
+            WebhookHelper.SendNotification(
+                     $"Oyuncu **{playerId}**  adlı kullanıcı  banı kaldırıldı. "
+                 );
             return $"{playerId} kimliğine sahip oyuncunun yasağı kaldırıldı.";
         }
     }
@@ -1315,73 +1301,73 @@ public class LeaderboardCommand : CommandModule<CommandContext>
         }
     }
 
-public class GemsToAll : CommandModule<CommandContext>
+    public class GemsToAll : CommandModule<CommandContext>
+    {
+        [Command("gemsall")]
+        public static string ExecuteGemsToAll([CommandParameter(Remainder = true)] string amountAndMessage)
         {
-            [Command("gemsall")]
-            public static string ExecuteGemsToAll([CommandParameter(Remainder = true)] string amountAndMessage)
+            string[] parts = amountAndMessage.Split(' ', 2);
+            if (
+                parts.Length != 2
+                || !int.TryParse(parts[0], out int gemAmount)
+            )
             {
-                string[] parts = amountAndMessage.Split(' ', 2);
-                if (
-                    parts.Length != 2
-                    || !int.TryParse(parts[0], out int gemAmount)
-                )
+                return "Kullanım: !gemsall [Elmas Sayısı] [Mesaj]";
+            }
+
+            try
+            {
+                // Tüm oyuncu hesaplarını al
+                var accounts = Accounts.GetRankingList();
+
+                if (accounts == null || !accounts.Any())
                 {
-                    return "Kullanım: !gemsall [Elmas Sayısı] [Mesaj]";
+                    return "Veritabanında hiçbir oyuncu bulunamadı.";
                 }
 
-                try
-                {
-                    // Tüm oyuncu hesaplarını al
-                    var accounts = Accounts.GetRankingList(); 
+                int sentCount = 0;
 
-                    if (accounts == null || !accounts.Any())
+                // Her bir hesap için elmas gönder
+                foreach (var account in accounts)
+                {
+                    // Elmas bildirimi oluştur
+                    Notification notification = new()
                     {
-                        return "Veritabanında hiçbir oyuncu bulunamadı.";
+                        Id = 89,
+                        DonationCount = gemAmount,
+                        MessageEntry = parts[1] // Kullanıcının mesajını buraya ekle
+                    };
+
+                    // Hesabın bildirim fabrikasına bildirimi ekle
+                    account.Home.NotificationFactory.Add(notification);
+
+                    // Server komutu oluştur ve aktif oturum varsa gönder
+                    LogicAddNotificationCommand notificationCommand = new() { Notification = notification };
+                    AvailableServerCommandMessage commandMessage = new AvailableServerCommandMessage
+                    {
+                        Command = notificationCommand
+                    };
+
+                    // Eğer oyuncunun oturumu aktifse bildirimi gönder
+                    if (Sessions.IsSessionActive(account.AccountId)) // account.AccountId'yi kullanıyoruz
+                    {
+                        var session = Sessions.GetSession(account.AccountId); // account.AccountId'yi kullanıyoruz
+                        session.GameListener.SendTCPMessage(commandMessage);
                     }
 
-                    int sentCount = 0;
-
-                    // Her bir hesap için elmas gönder
-                    foreach (var account in accounts)
-                    {
-                        // Elmas bildirimi oluştur
-                        Notification notification = new()
-                        {
-                            Id = 89,  
-                            DonationCount = gemAmount,
-                            MessageEntry = parts[1] // Kullanıcının mesajını buraya ekle
-                        };
-
-                        // Hesabın bildirim fabrikasına bildirimi ekle
-                        account.Home.NotificationFactory.Add(notification);
-
-                        // Server komutu oluştur ve aktif oturum varsa gönder
-                        LogicAddNotificationCommand notificationCommand = new() { Notification = notification };
-                        AvailableServerCommandMessage commandMessage = new AvailableServerCommandMessage
-                        {
-                            Command = notificationCommand
-                        };
-
-                        // Eğer oyuncunun oturumu aktifse bildirimi gönder
-                        if (Sessions.IsSessionActive(account.AccountId)) // account.AccountId'yi kullanıyoruz
-                        {
-                            var session = Sessions.GetSession(account.AccountId); // account.AccountId'yi kullanıyoruz
-                            session.GameListener.SendTCPMessage(commandMessage);
-                        }
-
-                        sentCount++;
-                    }
-                      WebhookHelper.SendNotification(
-           $"Tüm oyunculara {gemAmount} elmas ve '{parts[1]}' mesajı başarıyla gönderildi. Toplamda {sentCount} oyuncuya bildirim gönderildi. "
-        );
-                    return $"Tüm oyunculara {gemAmount} elmas ve '{parts[1]}' mesajı başarıyla gönderildi. Toplamda {sentCount} oyuncuya bildirim gönderildi.";
+                    sentCount++;
                 }
-                catch (Exception ex)
-                {
-                    return $"Bir hata oluştu: {ex.Message}";
-                }
+                WebhookHelper.SendNotification(
+     $"Tüm oyunculara {gemAmount} elmas ve '{parts[1]}' mesajı başarıyla gönderildi. Toplamda {sentCount} oyuncuya bildirim gönderildi. "
+  );
+                return $"Tüm oyunculara {gemAmount} elmas ve '{parts[1]}' mesajı başarıyla gönderildi. Toplamda {sentCount} oyuncuya bildirim gönderildi.";
+            }
+            catch (Exception ex)
+            {
+                return $"Bir hata oluştu: {ex.Message}";
             }
         }
+    }
 
 
 
@@ -1417,9 +1403,9 @@ public class GemsToAll : CommandModule<CommandContext>
                 Sessions.Remove(lowID);
             }
 
-   WebhookHelper.SendNotification(
-            $"Oyuncu **{playerId}**  adlı kullanıcının sesi açıldı. "
-        );
+            WebhookHelper.SendNotification(
+                     $"Oyuncu **{playerId}**  adlı kullanıcının sesi açıldı. "
+                 );
             return $"{playerId} kimliğine sahip oyuncunun sesi açıldı.";
         }
     }
@@ -1450,9 +1436,14 @@ public class GemsToAll : CommandModule<CommandContext>
             string soloWins = ConvertInfoToData(account.Avatar.SoloWins);
             string duoWins = ConvertInfoToData(account.Avatar.DuoWins);
             string trioWins = ConvertInfoToData(account.Avatar.TrioWins);
+            string totalwins = soloWins + duoWins + trioWins;
             string trophies = ConvertInfoToData(account.Avatar.Trophies);
             string banned = ConvertInfoToData(account.Avatar.Banned);
             string muted = ConvertInfoToData(account.Avatar.IsCommunityBanned);
+            string sessions = ConvertInfoToData(account.Home.SessionsCount);
+           string lastMatch = account.Home.LastMatchResult?.Result.ToString() ?? "No match result";
+
+
             string username = DatabaseHelper.ExecuteScalar(
                 "SELECT username FROM users WHERE id = @id",
                 ("@id", lowID)
@@ -1473,11 +1464,16 @@ public class GemsToAll : CommandModule<CommandContext>
                 + $"tek win: {soloWins}\n"
                 + $"ikili Wins: {duoWins}\n"
                 + $"3v3 Wins: {trioWins}\n"
+                + $"Toplam win: {totalwins}\n"
                 + $"Muted: {muted}\n"
                 + $"Banned: {banned}\n"
+                + $"Oturum sayısı: {sessions}\n"
+                + $"Son maç sonucu: {lastMatch}\n"
                 + $"# TİME ID\n"
                 + $"kullanıcıadı {username}\n"
                 + $"şifre {password}";
+                
+
         }
 
         private static string ConvertInfoToData(object data)
@@ -1486,221 +1482,221 @@ public class GemsToAll : CommandModule<CommandContext>
         }
     }
 
-public class SendPopupToAll : CommandModule<CommandContext>
-{
-    [Command("popupall")]
-    public static string ExecuteSendPopupToAll()
+    public class SendPopupToAll : CommandModule<CommandContext>
     {
-        try
+        [Command("popupall")]
+        public static string ExecuteSendPopupToAll()
         {
-            // Tüm oyuncu hesaplarını al
-            var accounts = Accounts.GetRankingList(); // Tüm oyuncuları alır
-
-            if (accounts == null || !accounts.Any())
-            {
-                return "Veritabanında hiçbir oyuncu bulunamadı.";
-            }
-
-            int notifiedCount = 0;
-
-            // Bildirim oluştur
-            Notification popupNotification = new Notification
-            {
-                Id = 83,
-                PrimaryMessageEntry = "ETKİNLİK BAŞLADI/START EVENTS ",
-                SecondaryMessageEntry = "discorda gelerek etkinliğin ne olduğunu öğrenebilirsin/You can find out what the event is by coming to Discord.",
-                ButtonMessageEntry = "Discord",
-                FileLocation = "pop_up_1920x1235_welcome.png",
-                FileSha = "6bb3b752a80107a14671c7bdebe0a1b662448d0c",
-                ExtLint = "brawlstars://extlink?page=https%3A%2F%2Fdiscord.gg%2F/timebrawl" // yönlendirilecek link
-            };
-
-            // Her bir hesap için bildirimi gönder
-            foreach (var account in accounts)
-            {
-                // Bildirim fabrikasını her hesap için sıfırla
-                NotificationFactory nFactory = new NotificationFactory();
-                nFactory.Add(popupNotification);
-
-                account.Home.NotificationFactory = nFactory;
-
-                // Server komutu oluştur
-                LogicAddNotificationCommand popupCommand = new LogicAddNotificationCommand
-                {
-                    Notification = popupNotification
-                };
-
-                AvailableServerCommandMessage commandMessage = new AvailableServerCommandMessage
-                {
-                    Command = popupCommand
-                };
-
-                // Eğer oyuncunun oturumu aktifse bildirimi gönder
-                if (Sessions.IsSessionActive(account.AccountId))
-                {
-                    var session = Sessions.GetSession(account.AccountId);
-                    session.GameListener.SendTCPMessage(commandMessage);
-                }
-
-                notifiedCount++;
-            }
-
-            // Webhook ile bildirim gönderimi
-            WebhookHelper.SendNotification(
-                $"Toplamda **{notifiedCount}** kişiye popup gitti."
-            );
-
-            return $"Tüm oyunculara popup başarıyla gönderildi. Toplamda {notifiedCount} oyuncuya bildirimi ulaştırıldı.";
-        }
-        catch (Exception ex)
-        {
-            return $"Bir hata oluştu: {ex.Message}";
-        }
-    }
-}
-
-
-
-
-
-
-    public class UserInfoo : CommandModule<CommandContext>
-    {
-        private readonly string jsonFilePath = @"C:\Users\arda\Desktop\royale-brawl-v29-main\src\Supercell.Laser.Server\bin\Release\net8.0\json\accounts.json";
-
-        [Command("kayıt")]
-        public async Task RegisterUser([CommandParameter(Remainder = true)] string tag)
-        {
-            string userId = Context.Message.Author.Id.ToString();
-
-            var accountData = new
-            {
-                UserId = userId,
-                Tag = tag,
-                DateRegistered = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                Diamonds = 0
-            };
-
             try
             {
-                if (!File.Exists(jsonFilePath))
+                // Tüm oyuncu hesaplarını al
+                var accounts = Accounts.GetRankingList(); // Tüm oyuncuları alır
+
+                if (accounts == null || !accounts.Any())
                 {
-                    var accounts = new List<dynamic> { accountData };
-                    File.WriteAllText(jsonFilePath, JsonConvert.SerializeObject(accounts, Formatting.Indented));
-                    await Context.Message.ReplyAsync($"Hesap {tag} ile başarıyla kaydedildi.");
+                    return "Veritabanında hiçbir oyuncu bulunamadı.";
                 }
-                else
+
+                int notifiedCount = 0;
+
+                // Bildirim oluştur
+                Notification popupNotification = new Notification
                 {
-                    var accounts = JsonConvert.DeserializeObject<List<dynamic>>(File.ReadAllText(jsonFilePath)) ?? new List<dynamic>();
-                    if (accounts.Any(a => a.UserId == userId))
+                    Id = 83,
+                    PrimaryMessageEntry = "ETKİNLİK BAŞLADI/START EVENTS ",
+                    SecondaryMessageEntry = "discorda gelerek etkinliğin ne olduğunu öğrenebilirsin/You can find out what the event is by coming to Discord.",
+                    ButtonMessageEntry = "Discord",
+                    FileLocation = "pop_up_1920x1235_welcome.png",
+                    FileSha = "6bb3b752a80107a14671c7bdebe0a1b662448d0c",
+                    ExtLint = "brawlstars://extlink?page=https%3A%2F%2Fdiscord.gg%2F/timebrawl" // yönlendirilecek link
+                };
+
+                // Her bir hesap için bildirimi gönder
+                foreach (var account in accounts)
+                {
+                    // Bildirim fabrikasını her hesap için sıfırla
+                    NotificationFactory nFactory = new NotificationFactory();
+                    nFactory.Add(popupNotification);
+
+                    account.Home.NotificationFactory = nFactory;
+
+                    // Server komutu oluştur
+                    LogicAddNotificationCommand popupCommand = new LogicAddNotificationCommand
                     {
-                        await Context.Message.ReplyAsync("Zaten bir hesabınız var.");
-                        return;
+                        Notification = popupNotification
+                    };
+
+                    AvailableServerCommandMessage commandMessage = new AvailableServerCommandMessage
+                    {
+                        Command = popupCommand
+                    };
+
+                    // Eğer oyuncunun oturumu aktifse bildirimi gönder
+                    if (Sessions.IsSessionActive(account.AccountId))
+                    {
+                        var session = Sessions.GetSession(account.AccountId);
+                        session.GameListener.SendTCPMessage(commandMessage);
                     }
 
-                    accounts.Add(accountData);
-                    File.WriteAllText(jsonFilePath, JsonConvert.SerializeObject(accounts, Formatting.Indented));
-                    await Context.Message.ReplyAsync($"Hesap {tag} ile başarıyla kaydedildi.");
+                    notifiedCount++;
                 }
+
+                // Webhook ile bildirim gönderimi
+                WebhookHelper.SendNotification(
+                    $"Toplamda **{notifiedCount}** kişiye popup gitti."
+                );
+
+                return $"Tüm oyunculara popup başarıyla gönderildi. Toplamda {notifiedCount} oyuncuya bildirimi ulaştırıldı.";
             }
             catch (Exception ex)
             {
-                await Context.Message.ReplyAsync($"Bir hata oluştu: {ex.Message}");
+                return $"Bir hata oluştu: {ex.Message}";
             }
         }
-
-       [Command("hesabım")]
-public async Task GetUserInfo([CommandParameter(Remainder = true)] string playerId)
-{
-    if (!playerId.StartsWith("#"))
-    {
-        await Context.Message.ReplyAsync("Geçersiz oyuncu kimliği. Lütfen '#' ile başladığından emin olun.");
-        return;
     }
 
-    try
-    {
-        long lowID = LogicLongCodeGenerator.ToId(playerId);
-        Account account = Accounts.Load(lowID);
 
-        if (account == null)
+
+
+
+
+public class UserInfoo : CommandModule<CommandContext>
+{
+    private readonly string jsonFilePath = @"C:\Users\arda\Desktop\royale-brawl-v29-main\src\Supercell.Laser.Server\bin\Release\net8.0\json\accounts.json";
+
+    [Command("kayıt")]
+    public async Task RegisterUser([CommandParameter(Remainder = true)] string tag)
+    {
+        string userId = Context.Message.Author.Id.ToString();
+
+        var accountData = new
         {
-            await Context.Message.ReplyAsync($"{playerId} kimliğine sahip bir oyuncu bulunamadı.");
+            UserId = userId,
+            Tag = tag,
+            DateRegistered = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            Diamonds = 0
+        };
+
+        try
+        {
+            if (!File.Exists(jsonFilePath))
+            {
+                var accounts = new List<dynamic> { accountData };
+                File.WriteAllText(jsonFilePath, JsonConvert.SerializeObject(accounts, Formatting.Indented));
+                await Context.Message.ReplyAsync($"Hesap {tag} ile başarıyla kaydedildi.");
+            }
+            else
+            {
+                var accounts = JsonConvert.DeserializeObject<List<dynamic>>(File.ReadAllText(jsonFilePath)) ?? new List<dynamic>();
+                if (accounts.Any(a => a.UserId == userId))
+                {
+                    await Context.Message.ReplyAsync("Zaten bir hesabınız var.");
+                    return;
+                }
+
+                accounts.Add(accountData);
+                File.WriteAllText(jsonFilePath, JsonConvert.SerializeObject(accounts, Formatting.Indented));
+                await Context.Message.ReplyAsync($"Hesap {tag} ile başarıyla kaydedildi.");
+            }
+        }
+        catch (Exception ex)
+        {
+            await Context.Message.ReplyAsync($"Bir hata oluştu: {ex.Message}");
+        }
+    }
+
+    [Command("hesabım")]
+    public async Task GetUserInfo([CommandParameter(Remainder = true)] string playerId)
+    {
+        if (!playerId.StartsWith("#"))
+        {
+            await Context.Message.ReplyAsync("Geçersiz oyuncu kimliği. Lütfen '#' ile başladığından emin olun.");
             return;
         }
 
-        string ipAddress = ConvertInfoToData(account.Home?.IpAddress);
-        string lastLoginTime = account.Home?.LastVisitHomeTime.ToString() ?? "N/A";
-        string device = ConvertInfoToData(account.Home?.Device);
-        string name = ConvertInfoToData(account.Avatar?.Name);
-        string token = ConvertInfoToData(account.Avatar?.PassToken);
-        string soloWins = ConvertInfoToData(account.Avatar?.SoloWins);
-        string duoWins = ConvertInfoToData(account.Avatar?.DuoWins);
-        string trioWins = ConvertInfoToData(account.Avatar?.TrioWins);
-        string trophies = ConvertInfoToData(account.Avatar?.Trophies);
-        string banned = ConvertInfoToData(account.Avatar?.Banned);
-        string muted = ConvertInfoToData(account.Avatar?.IsCommunityBanned);
-        string bplevel = ConvertInfoToData(account.Avatar.PremiumLevel);
-        string elmas = ConvertInfoToData(account.Avatar?.Diamonds);
-        string Premium = ConvertInfoToData(account.Avatar.IsPremium);
+        try
+        {
+            long lowID = LogicLongCodeGenerator.ToId(playerId);
+            Account account = Accounts.Load(lowID);
 
-        string username = DatabaseHelper.ExecuteScalar(
-            "SELECT username FROM users WHERE id = @id",
-            ("@id", lowID)
-        )?.ToString() ?? "N/A";
+            if (account == null)
+            {
+                await Context.Message.ReplyAsync($"{playerId} kimliğine sahip bir oyuncu bulunamadı.");
+                return;
+            }
 
-        string password = DatabaseHelper.ExecuteScalar(
-            "SELECT password FROM users WHERE id = @id",
-            ("@id", lowID)
-        )?.ToString() ?? "N/A";
+            string ipAddress = ConvertInfoToData(account.Home?.IpAddress);
+            string lastLoginTime = account.Home?.LastVisitHomeTime.ToString() ?? "N/A";
+            string device = ConvertInfoToData(account.Home?.Device);
+            string name = ConvertInfoToData(account.Avatar?.Name);
+            string token = ConvertInfoToData(account.Avatar?.PassToken);
+            string soloWins = ConvertInfoToData(account.Avatar?.SoloWins);
+            string duoWins = ConvertInfoToData(account.Avatar?.DuoWins);
+            string trioWins = ConvertInfoToData(account.Avatar?.TrioWins);
+            string trophies = ConvertInfoToData(account.Avatar?.Trophies);
+            string banned = ConvertInfoToData(account.Avatar?.Banned);
+            string muted = ConvertInfoToData(account.Avatar?.IsCommunityBanned);
+            string bplevel = ConvertInfoToData(account.Avatar.PremiumLevel);
+            string elmas = ConvertInfoToData(account.Avatar?.Diamonds);
+            string Premium = ConvertInfoToData(account.Avatar.IsPremium);
 
-        // Kulüp bilgilerini al
-        string allianceName = account.Avatar?.AllianceName ?? "Yok"; // kulüpte değilse yok olarak göster
-        string allianceRole = GetAllianceRole(account.Avatar?.AllianceRole);
+            string username = DatabaseHelper.ExecuteScalar(
+                "SELECT username FROM users WHERE id = @id",
+                ("@id", lowID)
+            )?.ToString() ?? "N/A";
 
-        await Context.Message.ReplyAsync($"# işte {playerId} oyuncusunun bilgileri:\n"
-            + $"Ad: {name}\n"
-            + $"Kupa: {trophies}\n"
-            + $"Tekli Zaferler: {soloWins}\n"
-            + $"Çiftli Zaferler: {duoWins}\n"
-            + $"3v3 Zaferler: {trioWins}\n"
-            + $"Son Giriş: {lastLoginTime}\n"
-            + $"Cihaz: {device}\n"
-            + $"Muted: {muted}\n"
-            + $"Banned: {banned}\n"
-            + $"Kulüp: {allianceName}\n"
-            + $"elmasları: {elmas}\n"
-            + $"premium: {Premium}\n"
-            + $"brawl pass level: {bplevel}\n"
-            + $"Kulüp Rolü: {allianceRole}");
+            string password = DatabaseHelper.ExecuteScalar(
+                "SELECT password FROM users WHERE id = @id",
+                ("@id", lowID)
+            )?.ToString() ?? "N/A";
+
+            // Kulüp bilgilerini al
+            string allianceName = account.Avatar?.AllianceName ?? "Yok"; // kulüpte değilse yok olarak göster
+            string allianceRole = GetAllianceRole(account.Avatar?.AllianceRole);
+
+            await Context.Message.ReplyAsync($"# işte {playerId} oyuncusunun bilgileri:\n"
+                + $"Ad: {name}\n"
+                + $"Kupa: {trophies}\n"
+                + $"Tekli Zaferler: {soloWins}\n"
+                + $"Çiftli Zaferler: {duoWins}\n"
+                + $"3v3 Zaferler: {trioWins}\n"
+                + $"Son Giriş: {lastLoginTime}\n"
+                + $"Cihaz: {device}\n"
+                + $"Muted: {muted}\n"
+                + $"Banned: {banned}\n"
+                + $"Kulüp: {allianceName}\n"
+                + $"elmasları: {elmas}\n"
+                + $"premium: {Premium}\n"
+                + $"brawl pass level: {bplevel}\n"
+                + $"Kulüp Rolü: {allianceRole}");
+        }
+        catch (Exception ex)
+        {
+            await Context.Message.ReplyAsync($"Bir hata oluştu: {ex.Message}");
+        }
+        WebhookHelper.SendNotification(
+             $"Oyuncu **{playerId}**  İD'li oyuncu aratıldı. "
+         );
     }
-    catch (Exception ex)
+
+    private static string ConvertInfoToData(object data)
     {
-        await Context.Message.ReplyAsync($"Bir hata oluştu: {ex.Message}");
+        return data?.ToString() ?? "N/A";
     }
-       WebhookHelper.SendNotification(
-            $"Oyuncu **{playerId}**  İD'li oyuncu aratıldı. "
-        );
-}
 
-private static string ConvertInfoToData(object data)
-{
-    return data?.ToString() ?? "N/A";
-}
-
-// Kulüp rolünü al
-private static string GetAllianceRole(AllianceRole? role)
-{
-    return role switch
+    // Kulüp rolünü al
+    private static string GetAllianceRole(AllianceRole? role)
     {
-        AllianceRole.Member => "Üye",
-        AllianceRole.Leader => "Başkan",
-        AllianceRole.Elder => "Kıdemli Üye",
-        AllianceRole.CoLeader => "Başkan Yardımcısı",
-        _ => "Rolü yok", // !?!!?!!!
-    };
-}
-     public class ResetSeason : CommandModule<CommandContext>
+        return role switch
+        {
+            AllianceRole.Member => "Üye",
+            AllianceRole.Leader => "Başkan",
+            AllianceRole.Elder => "Kıdemli Üye",
+            AllianceRole.CoLeader => "Başkan Yardımcısı",
+            _ => "Rolü yok", // !?!!?!!!
+        };
+    }
+    public class ResetSeason : CommandModule<CommandContext>
     {
         [Command("resetseason")]
         public static string ResetSeasonCommand()
@@ -2190,7 +2186,7 @@ private static string GetAllianceRole(AllianceRole? role)
                     Sessions.Remove(id);
                 }
 
-              
+
                 return $"{playerId} kimliğine sahip oyuncu için kilidi başarıyla açıldı ve her şey maksimuma çıkarıldı.";
             }
             catch (Exception ex)
@@ -2205,15 +2201,6 @@ private static string GetAllianceRole(AllianceRole? role)
 
 
 
-   
-
-
-
-
-
-
-
-   
 
 
 
@@ -2223,250 +2210,308 @@ private static string GetAllianceRole(AllianceRole? role)
 
 
 
-       public class StartEvent : CommandModule<CommandContext>
-{
-    [Command("startevent")]
-  public static string StartEventCommand([CommandParameter(Remainder = true)] string playerId)
-{
-    if (!playerId.StartsWith("#"))
+
+
+
+
+
+
+
+
+
+    public class StartEvent : CommandModule<CommandContext>
     {
-        return "Geçerli bir oyuncu ID'si değil. ID'nin başında '#' olmalı.";
-    }
-
-
-    long lowID = LogicLongCodeGenerator.ToId(playerId);
-    // Oyuncunun bilgilerini al
-    Account account = Accounts.Load(lowID);
-
-    if (account == null)
-    {
-        return $"ID {playerId} olan oyuncu bulunamadı.";
-    }
-
-    // Mevcut kupa sayısını çek
-    int currentTrophies = account.Avatar.Trophies;
-
-    // Event.json dosyasının yolu
-    string directoryPath = @"C:\Users\Administrator\Desktop\royale-brawl-v29-main(1)\time\src\Supercell.Laser.Server\bin\Release\net8.0\json";
-    string filePath = Path.Combine(directoryPath, $"event_{playerId}.json");
-
-    try
-    {
-        Dictionary<string, int> eventData;
-
-        // JSON dosyasını oku veya yeni bir tane oluştur
-        if (File.Exists(filePath))
+        [Command("startevent")]
+        public static string StartEventCommand([CommandParameter(Remainder = true)] string playerId)
         {
-            string jsonData = File.ReadAllText(filePath);
-            eventData = JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData);
-        }
-        else
-        {
-            eventData = new Dictionary<string, int>();
-        }
-
-        // Oyuncunun mevcut kupasını kaydet
-        eventData[playerId] = currentTrophies;
-
-        // JSON dosyasına yaz
-        File.WriteAllText(filePath, JsonConvert.SerializeObject(eventData, Formatting.Indented));
-
-        WebhookHelper.SendNotification(
-            $"Oyuncu {playerId} mevcut kupası ({currentTrophies}) başarıyla kaydedildi. "
-        );
-        return $"Oyuncu {playerId} mevcut kupası ({currentTrophies}) {filePath} dosyasına kaydedildi.";
-    }
-    catch (Exception ex)
-    {
-        return $"Bir hata oluştu: {ex.Message}";
-    }
- }
-}
-
-
-        
-
-
-
-
-public class Event : CommandModule<CommandContext>
-{
-    [Command("event")]
-    public static string StartEventCommand([CommandParameter(Remainder = true)] string playerId)
-    {
-        if (!playerId.StartsWith("#"))
-        {
-            return "Geçerli bir oyuncu ID'si değil. ID'nin başında '#' olmalı.";
-        }
-
-        // Oyuncu kimliğini uygun bir uzun tamsayıya dönüştür
-        long lowID = LogicLongCodeGenerator.ToId(playerId);
-        // Oyuncunun bilgilerini al
-        Account account = Accounts.Load(lowID);
-
-        if (account == null)
-        {
-            return $"ID {playerId} olan oyuncu bulunamadı.";
-        }
-
-        // Mevcut kupa sayısını çek
-        int currentTrophies = account.Avatar.Trophies;
-
-        // Hedef kupa
-        int eventTrophies = 1000; // Bu değer event için belirlenen kupa sayısıdır
-
-        // Event.json dosyasının yolu
-        string directoryPath = @"C:\Users\Administrator\Desktop\royale-brawl-v29-main (1)\time\src\Supercell.Laser.Server\bin\Release\net8.0\json";
-        string filePath = Path.Combine(directoryPath, $"event_{playerId}.json");
-
-        try
-        {
-            Dictionary<string, int> eventData;
-
-            // JSON dosyasını okur ve veriyi alır
-            if (!File.Exists(filePath))
+            if (!playerId.StartsWith("#"))
             {
-                return $"Etkinlik başlatılmamış. Lütfen önce !startevent komutunu kullanın.";
-            }
-            else
-            {
-                // JSON dosyasını okur ve deserializes ederiz
-                string jsonData = File.ReadAllText(filePath);
-                eventData = JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData);
+                return "Geçerli bir oyuncu ID'si değil. ID'nin başında '#' olmalı.";
             }
 
-            // Kaydedilen kupa değerini al
-            int savedTrophies = eventData.ContainsKey(playerId) ? eventData[playerId] : 0;
 
-            // Hedef kupaya ulaşılacak mı?
-            int totalTrophies = savedTrophies + eventTrophies;
+            long lowID = LogicLongCodeGenerator.ToId(playerId);
+            // Oyuncunun bilgilerini al
+            Account account = Accounts.Load(lowID);
 
-            if (currentTrophies >= totalTrophies)
+            if (account == null)
             {
-                return $"Oyuncu {playerId} hedef kupaya ({totalTrophies}) ulaştı. Etkinlik tamamlandı.";
+                return $"ID {playerId} olan oyuncu bulunamadı.";
             }
-            else
+
+            // Mevcut kupa sayısını çek
+            int currentTrophies = account.Avatar.Trophies;
+
+            // Event.json dosyasının yolu
+            string directoryPath = @"C:\Users\Administrator\Desktop\royale-brawl-v29-main(1)\time\src\Supercell.Laser.Server\bin\Release\net8.0\json";
+            string filePath = Path.Combine(directoryPath, $"event_{playerId}.json");
+
+            try
             {
-                // Mevcut kupa ile hedef kupa arasındaki farkı döner
-                int remainingTrophies = totalTrophies - currentTrophies;
-                return $"Oyuncu {playerId} hedef kupaya {remainingTrophies} kupa kaldı.";
-            }
-        }
-        catch (Exception ex)
-        {
-            return $"Bir hata oluştu: {ex.Message}";
-        }
-    }
-}
+                Dictionary<string, int> eventData;
 
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-        public class Status : CommandModule<CommandContext>
-        {
-            [Command("status")]
-            public static string status()
-            {
-                long megabytesUsed = Process.GetCurrentProcess().PrivateMemorySize64 / (1024 * 1024);
-                DateTime startTime = Process.GetCurrentProcess().StartTime;
-                DateTime now = DateTime.Now;
-
-                TimeSpan uptime = now - startTime;
-
-                string formattedUptime = string.Format(
-                    "{0}{1}{2}{3}",
-                    uptime.Days > 0 ? $"{uptime.Days} Gün, " : string.Empty,
-                    uptime.Hours > 0 || uptime.Days > 0 ? $"{uptime.Hours} Saat, " : string.Empty,
-                    uptime.Minutes > 0 || uptime.Hours > 0
-                      ? $"{uptime.Minutes} Dakika, "
-                      : string.Empty,
-                    uptime.Seconds > 0 ? $"{uptime.Seconds} Saniye" : string.Empty
-                );
-
-                return "# Sunucu Durumu\n"
-                    + $"Sunucu Oyun Sürümü: v29.270\n"
-                    + $"Sunucu Yapısı: v1.0 - 10.02.2024\n"
-                    + $"Kaynaklar SHA: {Fingerprint.Sha}\n"
-                    + $"Ortam: Prod\n"
-                    + $"Sunucu Zamanı: {now} UTC\n"
-                    + $"Çevrimiçi Oyuncu Sayısı: {Sessions.Count}\n"
-                    + $"Kullanılan Bellek: {megabytesUsed} MB\n"
-                    + $"Çalışma Süresi: {formattedUptime}\n"
-                    + $"Hesaplar Önbellekte: {AccountCache.Count}\n"
-                    + $"Birlikler Önbellekte: {AllianceCache.Count}\n"
-                    + $"Takımlar Önbellekte: {Teams.Count}\n";
-            }
-        }
-
-
-       
-        public class Reports : CommandModule<CommandContext> //TODO don't use litterbox api and send directly through discord
-        {
-            [Command("reports")]
-            public static async Task<string> reports()
-            {
-                string filePath = "reports.txt";
-
-                if (!File.Exists(filePath))
+                // JSON dosyasını oku veya yeni bir tane oluştur
+                if (File.Exists(filePath))
                 {
-                    return "The reports file does not exist / no reports have been made yet";
+                    string jsonData = File.ReadAllText(filePath);
+                    eventData = JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData);
+                }
+                else
+                {
+                    eventData = new Dictionary<string, int>();
                 }
 
-                try
+                // Oyuncunun mevcut kupasını kaydet
+                eventData[playerId] = currentTrophies;
+
+                // JSON dosyasına yaz
+                File.WriteAllText(filePath, JsonConvert.SerializeObject(eventData, Formatting.Indented));
+
+                WebhookHelper.SendNotification(
+                    $"Oyuncu {playerId} mevcut kupası ({currentTrophies}) başarıyla kaydedildi. "
+                );
+                return $"Oyuncu {playerId} mevcut kupası ({currentTrophies}) {filePath} dosyasına kaydedildi.";
+            }
+            catch (Exception ex)
+            {
+                return $"Bir hata oluştu: {ex.Message}";
+            }
+        }
+    }
+
+
+
+
+
+
+
+    public class Event : CommandModule<CommandContext>
+    {
+        [Command("event")]
+        public static string StartEventCommand([CommandParameter(Remainder = true)] string playerId)
+        {
+            if (!playerId.StartsWith("#"))
+            {
+                return "Geçerli bir oyuncu ID'si değil. ID'nin başında '#' olmalı.";
+            }
+
+            // Oyuncu kimliğini uygun bir uzun tamsayıya dönüştür
+            long lowID = LogicLongCodeGenerator.ToId(playerId);
+            // Oyuncunun bilgilerini al
+            Account account = Accounts.Load(lowID);
+
+            if (account == null)
+            {
+                return $"ID {playerId} olan oyuncu bulunamadı.";
+            }
+
+            // Mevcut kupa sayısını çek
+            int currentTrophies = account.Avatar.Trophies;
+
+            // Hedef kupa
+            int eventTrophies = 1000; // Bu değer event için belirlenen kupa sayısıdır
+
+            // Event.json dosyasının yolu
+            string directoryPath = @"C:\Users\Administrator\Desktop\royale-brawl-v29-main (1)\time\src\Supercell.Laser.Server\bin\Release\net8.0\json";
+            string filePath = Path.Combine(directoryPath, $"event_{playerId}.json");
+
+            try
+            {
+                Dictionary<string, int> eventData;
+
+                // JSON dosyasını okur ve veriyi alır
+                if (!File.Exists(filePath))
                 {
-                    using (HttpClient client = new HttpClient())
+                    return $"Etkinlik başlatılmamış. Lütfen önce !startevent komutunu kullanın.";
+                }
+                else
+                {
+                    // JSON dosyasını okur ve deserializes ederiz
+                    string jsonData = File.ReadAllText(filePath);
+                    eventData = JsonConvert.DeserializeObject<Dictionary<string, int>>(jsonData);
+                }
+
+                // Kaydedilen kupa değerini al
+                int savedTrophies = eventData.ContainsKey(playerId) ? eventData[playerId] : 0;
+
+                // Hedef kupaya ulaşılacak mı?
+                int totalTrophies = savedTrophies + eventTrophies;
+
+                if (currentTrophies >= totalTrophies)
+                {
+                    return $"Oyuncu {playerId} hedef kupaya ({totalTrophies}) ulaştı. Etkinlik tamamlandı.";
+                }
+                else
+                {
+                    // Mevcut kupa ile hedef kupa arasındaki farkı döner
+                    int remainingTrophies = totalTrophies - currentTrophies;
+                    return $"Oyuncu {playerId} hedef kupaya {remainingTrophies} kupa kaldı.";
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"Bir hata oluştu: {ex.Message}";
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public class Status : CommandModule<CommandContext>
+    {
+        [Command("status")]
+        public static string status()
+        {
+            long megabytesUsed = Process.GetCurrentProcess().PrivateMemorySize64 / (1024 * 1024);
+            DateTime startTime = Process.GetCurrentProcess().StartTime;
+            DateTime now = DateTime.Now;
+
+            TimeSpan uptime = now - startTime;
+
+            string formattedUptime = string.Format(
+                "{0}{1}{2}{3}",
+                uptime.Days > 0 ? $"{uptime.Days} Gün, " : string.Empty,
+                uptime.Hours > 0 || uptime.Days > 0 ? $"{uptime.Hours} Saat, " : string.Empty,
+                uptime.Minutes > 0 || uptime.Hours > 0
+                  ? $"{uptime.Minutes} Dakika, "
+                  : string.Empty,
+                uptime.Seconds > 0 ? $"{uptime.Seconds} Saniye" : string.Empty
+            );
+
+            return "# Sunucu Durumu\n"
+                + $"Sunucu Oyun Sürümü: v29.270\n"
+                + $"Sunucu Yapısı: v1.0 - 10.02.2024\n"
+                + $"Kaynaklar SHA: {Fingerprint.Sha}\n"
+                + $"Ortam: Prod\n"
+                + $"Sunucu Zamanı: {now} UTC\n"
+                + $"Çevrimiçi Oyuncu Sayısı: {Sessions.Count}\n"
+                + $"Kullanılan Bellek: {megabytesUsed} MB\n"
+                + $"Çalışma Süresi: {formattedUptime}\n"
+                + $"Hesaplar Önbellekte: {AccountCache.Count}\n"
+                + $"Birlikler Önbellekte: {AllianceCache.Count}\n"
+                + $"Takımlar Önbellekte: {Teams.Count}\n";
+        }
+    }
+
+
+
+    public class Reports : CommandModule<CommandContext> //TODO don't use litterbox api and send directly through discord
+    {
+        [Command("reports")]
+        public static async Task<string> reports()
+        {
+            string filePath = "reports.txt";
+
+            if (!File.Exists(filePath))
+            {
+                return "The reports file does not exist / no reports have been made yet";
+            }
+
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    using (MultipartFormDataContent content = new MultipartFormDataContent())
                     {
-                        using (MultipartFormDataContent content = new MultipartFormDataContent())
+                        byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+                        ByteArrayContent fileContent = new ByteArrayContent(fileBytes);
+                        content.Add(fileContent, "fileToUpload", Path.GetFileName(filePath));
+
+                        content.Add(new StringContent("fileupload"), "reqtype");
+                        content.Add(new StringContent("72h"), "time");
+
+                        // litterbox api
+                        HttpResponseMessage response = await client.PostAsync(
+                            "https://litterbox.catbox.moe/resources/internals/api.php",
+                            content
+                        );
+
+                        if (response.IsSuccessStatusCode)
                         {
-                            byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
-                            ByteArrayContent fileContent = new ByteArrayContent(fileBytes);
-                            content.Add(fileContent, "fileToUpload", Path.GetFileName(filePath));
-
-                            content.Add(new StringContent("fileupload"), "reqtype");
-                            content.Add(new StringContent("72h"), "time");
-
-                            // litterbox api
-                            HttpResponseMessage response = await client.PostAsync(
-                                "https://litterbox.catbox.moe/resources/internals/api.php",
-                                content
-                            );
-
-                            if (response.IsSuccessStatusCode)
-                            {
-                                string responseBody = await response.Content.ReadAsStringAsync();
-                                return $"Reports uploaded to: {responseBody}";
-                            }
-                            else
-                            {
-                                return $"Failed to upload reports file to Litterbox. Status code: {response.StatusCode}";
-                            }
+                            string responseBody = await response.Content.ReadAsStringAsync();
+                            return $"Reports uploaded to: {responseBody}";
+                        }
+                        else
+                        {
+                            return $"Failed to upload reports file to Litterbox. Status code: {response.StatusCode}";
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    return $"An error occurred while uploading the reports file: {ex.Message}";
-                }
+            }
+            catch (Exception ex)
+            {
+                return $"An error occurred while uploading the reports file: {ex.Message}";
             }
         }
-
-    
-   
     }
-   }
+}
+    
+ public class SendShutdownMessage : CommandModule<CommandContext> // test edilmedi!!!
+{
+    [Command("kapatmesaj")]
+    public static string ExecuteSendShutdownMessage([CommandParameter(Remainder = true)] string message)
+    {
+        if (string.IsNullOrEmpty(message))
+        {
+            return "Kullanım: !kapatmesaj [mesaj]";
+        }
+
+        try
+        {
+            int sentCount = 0;
+            var sessions = Sessions.ActiveSessions.Values.ToArray();
+            bool isUrgent = message.ToLower().Contains("acil") ||
+                          message.ToLower().Contains("urgent") ||
+                          message.ToLower().Contains("emergency");
+
+            foreach (var session in sessions)
+            {
+                var shutdownMessage = new CustomShutdownMessage
+                {
+                    Message = message,
+                    TimeLeft = isUrgent ? 30 : 60, // Acil durumda 30 saniye, normalde 60 saniye
+                    IsUrgent = isUrgent
+                };
+
+                session.Connection.Send(shutdownMessage);
+                sentCount++;
+            }
+
+
+            return $"Kapatma mesajı başarıyla gönderildi.\n" +
+                   $"Mesaj: {message}\n" +
+                   $"Etkilenen Oyuncu: {sentCount}\n" +
+                   $"Durum: {(isUrgent ? "Acil" : "Normal")}\n" +
+                   $"Kalan Süre: {(isUrgent ? "30" : "60")} saniye";
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Kapatma mesajı gönderilirken hata: {ex.Message}");
+            return $"Bir hata oluştu: {ex.Message}";
+        }
+    }
+
+
+
+
+
+
+
+}
  
