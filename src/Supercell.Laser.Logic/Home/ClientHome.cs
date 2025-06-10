@@ -938,7 +938,7 @@ namespace Supercell.Laser.Logic.Home
 
             ByteStreamHelper.WriteDataReference(encoder, Character); // Selected Brawler
 
-            encoder.WriteString("US"); // Location
+            encoder.WriteString("TR"); // Location
             encoder.WriteString(HomeMode.Avatar.SupportedCreator);
 
             encoder.WriteVInt(6); // IntValueEntry

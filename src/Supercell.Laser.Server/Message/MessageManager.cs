@@ -1435,7 +1435,7 @@
                       Console.Write("theme kullanıldı");
                       if (cmd.Length != 2)
                         {
-                            // bazıları çalışmıyor 
+                            // bazıları çalışmıyor (sanırım)
                             response.Entry.Message = $"Kullanım: /theme [tema_id]\nTemalar:\n1. Default (41000000)\n2. Winter (41000001)\n3. LNY (41000002)\n4. CR (41000003)\n5. Easter (41000004)\n6. GoldenWeek (41000005)\n7. Retropolis (41000006)\n8. Mecha (41000007)\n9. Halloween (41000008)\n10. Brawlidays (41000009)\n11. LNY20 (41000010)\n12. PSG (41000011)\n13. SC10 (41000012)\n14. Bazaar (41000013)\n15. Monsters (41000014)\n16. Giftshop (41000015)\n17. MoonFestival20 (41000016)";
                             Connection.Send(response);
                             return;
@@ -2960,31 +2960,43 @@
 
         private void DeviceInfoRecieved(AuthenticationMessage message)
         {
-            if (message == null || string.IsNullOrEmpty(message.DeviceId) || string.IsNullOrEmpty(message.Android) || string.IsNullOrEmpty(Connection.Socket.RemoteEndPoint.ToString()))
-            {
-                SendAuthenticationFailed(1, "Invalid device information.");
-                Console.WriteLine("device info alınamadı bağlantı kesliyor");
-               // Connection.Close(); zaten failed  ediliyor gerek varmı?!
-                return;
-            }
-
-            // Log the device information for debugging purposes
-            Console.WriteLine($"Device ID: {message.DeviceId},\n Android Version: {message.Android},\n IP Address: {Connection.Socket.RemoteEndPoint},\n  dil: {message.DeviceLang},\n  sha: {message.Sha},\n");
-            Console.Write("porno");
-            Console.WriteLine("server sha: " + Fingerprint.Sha);
-            Console.WriteLine("client sha: " + message.Sha);
-            if (message.Sha != Fingerprint.Sha)
-            {
-                SendAuthenticationFailed(1, "sha uyuşmuyor?!");
-                return;
-            }
+            
+           
 
           
         }
 
         private void LoginReceived(AuthenticationMessage message)
         {
-            DeviceInfoRecieved(message);
+           string ip = Connection.Socket.RemoteEndPoint.ToString().Split(':')[0];
+           string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "blocked_ips.txt");
+           string devicepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "deviceid.txt"); //banlı deviceid koruma system || load fonksiyonu yap(sunucu yavaşlarmı acaba?)
+            
+             
+            Console.WriteLine($"Device ID: {message.DeviceId},\n Android Version: {message.Android},\n IP Address: {Connection.Socket.RemoteEndPoint},\n  dil: {message.DeviceLang},\n  sha: {message.Sha},\n");
+            Console.WriteLine("porno");
+            //Console.WriteLine("server sha: " + Fingerprint.Sha);
+            //Console.WriteLine("client sha: " + message.Sha);
+            if (message.Sha != Fingerprint.Sha)
+            {
+                SendAuthenticationFailed(1, "sha uyuşmuyor?!");
+                Console.WriteLine("sha uyuşmuyor?!");
+                return;  
+            }
+           
+            if (message == null || string.IsNullOrEmpty(message.DeviceId) || string.IsNullOrEmpty(message.Android) || string.IsNullOrEmpty(Connection.Socket.RemoteEndPoint.ToString()))
+            {
+                SendAuthenticationFailed(1, "Invalid device information.(ipban)");
+                Console.WriteLine("device info alınamadı bağlantı kesliyor");
+                if(!File.Exists(path) ||!File.ReadAllLines(path).Contains(ip)) // dosyayı oku eğer ip yoksa banla
+                {
+                    File.AppendAllText(path, ip + Environment.NewLine); // sadece satırı ekle
+                    Console.WriteLine("orosbu çocuğu banlandı: " + ip); // tcp'den koruma yapmalıyız
+                }
+               // Connection.Close(); zaten failed  ediliyor gerek varmı?!
+                return; // bakalım hesap açacakmı
+            }
+
 
           //  Console.WriteLine("deviceinfo method called");
             Account account = GetAccount(message);
@@ -2993,13 +3005,14 @@
 
             if (account == null)
             {
-                SendAuthenticationFailed(1, "Unknown Error occurred while loading account");
+                SendAuthenticationFailed(1, "aradığın hesabı bulamadık verileri temizleyin veya  yöneticiyle görüşün");
                 return;
             }
 
             if (message.AccountId == 0)
             {
                 account = Accounts.Create();
+                Console.Write("account açıldı koruma çalıştımı?!");
             }
             else
             {
