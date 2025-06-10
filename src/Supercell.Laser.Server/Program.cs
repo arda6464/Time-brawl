@@ -31,9 +31,10 @@ namespace Supercell.Laser.Server
             Resources.InitDiscord();
             Resources.InitLogic();
             Resources.InitNetwork();
-            
+
             // Sunucu başlatıldı
             Logger.Print("Server started successfully!");
+            Console.ReadKey();
            
         }
     }
