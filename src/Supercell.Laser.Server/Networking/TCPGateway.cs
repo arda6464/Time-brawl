@@ -18,19 +18,20 @@
         private static Dictionary<IPAddress, int> ConnectionAttempts;
         private static HashSet<IPAddress> IPBlacklist;
         private static HashSet<IPAddress> LoggedBlacklistedIPs;
-        private static string BlacklistFilePath = "ipblacklist.txt";
+        private static string BlacklistFilePath = "blocked_ips.txt";
         private static bool AntiDDoSEnabled;
         private static Timer BlacklistReloadTimer;
 
         public static void Init(string host, int port)
         {
-            ActiveConnections = new List<Connection>();
+            ActiveConnections = new List<Connection>    ();
             ConnectionAttempts = new Dictionary<IPAddress, int>();
             IPBlacklist = new HashSet<IPAddress>();
             LoggedBlacklistedIPs = new HashSet<IPAddress>();
 
-            Configuration config = Configuration.LoadFromFile("config.json");
-            AntiDDoSEnabled = config.antiddos;
+           Configuration config = Configuration.LoadFromFile("config.json"); 
+              AntiDDoSEnabled = config.antiddos; // true yap şunu amk ne uğraşıyoz
+            
 
             if (AntiDDoSEnabled)
             {
@@ -95,7 +96,12 @@
                         {
                             Logger.Print($"DDoS from {clientIP} detected. Has been added to blacklist.");
                             IPBlacklist.Add(clientIP);
-                            File.AppendAllText(BlacklistFilePath, clientIP + Environment.NewLine);
+                            if (!File.ReadAllLines(BlacklistFilePath).Contains(clientIP.ToString())) //
+                            {
+                               
+                                 File.AppendAllText(BlacklistFilePath, clientIP + Environment.NewLine);
+                            }
+                           
                             client.Close();
                             AcceptEvent.Set();
                             return;
@@ -105,13 +111,14 @@
 
                 Connection connection = new Connection(client);
                 ActiveConnections.Add(connection);
-                Logger.Print($"New connection from IP: {clientIP}!");
+                Logger.Print($"yeni bağlantı:  {clientIP}!");
                 Connections.AddConnection(connection);
                 client.BeginReceive(connection.ReadBuffer, 0, 1024, SocketFlags.None, new AsyncCallback(OnReceive), connection);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ;
+                   Logger.Print($"OnAccept Hatası: {ex.GetType().Name} - {ex.Message}"); 
+
             }
 
             AcceptEvent.Set();
@@ -198,20 +205,22 @@
             {
                 lock (IPBlacklist)
                 {
-                    IPBlacklist.Clear();
+                    IPBlacklist.Clear(); //  önceki blacklisti temizle
                     LoggedBlacklistedIPs.Clear();
                     foreach (var line in File.ReadAllLines(BlacklistFilePath))
                     {
                         if (IPAddress.TryParse(line, out var ip))
                         {
                             IPBlacklist.Add(ip);
+                            Console.WriteLine($"loading:  {ip}");
                         }
                     }
+                    Console.WriteLine(IPBlacklist.Count); // kaç tane ip var blacklistte
                 }
             }
         }
 
-        private static void ReloadBlacklist(object state)
+        private static void ReloadBlacklist(object state) // 
         {
             Logger.Print("Reloading blacklist...");
             LoadBlacklist();
