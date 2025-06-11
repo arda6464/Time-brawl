@@ -7,6 +7,7 @@
     using Supercell.Laser.Logic.Message.Account;
     using Supercell.Laser.Logic.Message.Account.Auth;
     using Supercell.Laser.Logic.Message.Friends;
+    using Supercell.Laser.Logic.Message.Home;
     using Supercell.Laser.Logic.Util;
     using Supercell.Laser.Server.Logic.Game;
 
@@ -53,6 +54,20 @@
                 {
                     ErrorCode = 10,
                 });
+            }
+        }
+
+        public static void SendGlobalLobbyMessage(string message)
+        {
+            LobbyInfoMessage lobbyMessage = new LobbyInfoMessage()
+            {
+                LobbyData = message,
+                PlayersCount = 0
+            };
+
+            foreach (var session in ActiveSessions.Values.ToArray())
+            {
+                session.Connection.Send(lobbyMessage);
             }
         }
 

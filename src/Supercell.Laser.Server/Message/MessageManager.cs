@@ -104,13 +104,28 @@
             }
 
             bool hasPremium = HomeMode.Home.PremiumEndTime >= DateTime.UtcNow;
-
-            LobbyInfoMessage b = new()
+              long accountId = HomeMode.Avatar.AccountId;
+              Account acc = Accounts.Load(accountId);
+              Console.WriteLine($"Account: {acc.AccountId} - {acc.Avatar.Name}");
+            if (acc.Home.Dil == 18)
             {
-                LobbyData = $"<cff001f>R<cff003f>o<cff005f>y<cff007f>a<cff009f>l<cff00bf>e<cff00df> <cff00ff>B<cdf00ff>r<cbf00ff>a<c9f00ff>w<c7f00ff>l<c5f00ff> <c3f00ff>v<c1f00ff>2<c0000ff>9</c>\n<c001cff>g<c0038ff>i<c0055ff>t<c0071ff>h<c008dff>u<c00aaff>b<c00c6ff>.<c00e2ff>c<c00ffff>o<c00ffe2>m<c00ffc6>/<c00ffa9>e<c00ff8d>r<c00ff71>d<c00ff54>e<c00ff38>r<c00ff1c>0<c00ff00>0</c>\n{abd}Players Online: {Sessions.Count}\nUptime: {formattedUptime}\nPremium: {hasPremium}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhi'",
-                PlayersCount = 0
-            };
-            Connection.Send(b);
+                LobbyInfoMessage a = new()
+                {
+                    LobbyData = $"iyi akşamlar arda :)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhi'",
+                    PlayersCount = 0
+                };
+                Connection.Send(a);
+
+            }
+            else
+            {
+                LobbyInfoMessage b = new()
+                {
+                    LobbyData = $"<cff001f>R<cff003f>o<cff005f>y<cff007f>a<cff009f>l<cff00bf>e<cff00df> <cff00ff>B<cdf00ff>r<cbf00ff>a<c9f00ff>w<c7f00ff>l<c5f00ff> <c3f00ff>v<c1f00ff>2<c0000ff>9</c>\n<c001cff>g<c0038ff>i<c0055ff>t<c0071ff>h<c008dff>u<c00aaff>b<c00c6ff>.<c00e2ff>c<c00ffff>o<c00ffe2>m<c00ffc6>/<c00ffa9>e<c00ff8d>r<c00ff71>d<c00ff54>e<c00ff38>r<c00ff1c>0<c00ff00>0</c>\n{abd}Players Online: {Sessions.Count}\nUptime: {formattedUptime}\nPremium: {hasPremium}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhi'",
+                    PlayersCount = 0
+                };
+                Connection.Send(b);
+            }
         }
 
         public void ReceiveMessage(GameMessage message)
@@ -598,10 +613,11 @@
             team.AddStreamEntry(entry);
         }
 
-        private void AvatarNameCheckRequestReceived(AvatarNameCheckRequestMessage message)
+        private void AvatarNameCheckRequestReceived(AvatarNameCheckRequestMessage message) // bu oyun içinden değiştirilen sistemmi?!
         {
             LogicChangeAvatarNameCommand command = new LogicChangeAvatarNameCommand();
             command.Name = message.Name;
+            Console.WriteLine($" isim değiştirme isteği: {message.Name}");
             command.ChangeNameCost = 0;
             command.Execute(HomeMode);
             if (HomeMode.Avatar.AllianceId >= 0)
@@ -1347,7 +1363,7 @@
 
         private void ChatToAllianceStreamReceived(ChatToAllianceStreamMessage message)
         {
-            Alliance alliance = Alliances.Load(HomeMode.Avatar.AllianceId);
+            Alliance alliance = Alliances.Load(HomeMode.Avatar.AllianceId); 
             if (alliance == null) return;
 
             if (message.Message.StartsWith("/"))
@@ -1444,7 +1460,7 @@
                         {
                             if (themeId >= 0 && themeId <= 16)
                             {
-                              int fixthemeId = 41000000 + themeId; // Assuming themes are indexed from 0 to 16
+                              int fixthemeId = 41000000 + themeId; 
                                 HomeMode.Home.ThemeId = fixthemeId;
                                 response.Entry.Message = $"Tema başarıyla değiştirildi: {themeId}";
                                  Connection.Send(response);
@@ -2958,19 +2974,13 @@
             team.TeamUpdated();
         }
 
-        private void DeviceInfoRecieved(AuthenticationMessage message)
-        {
-            
-           
-
-          
-        }
+     
 
         private void LoginReceived(AuthenticationMessage message)
         {
            string ip = Connection.Socket.RemoteEndPoint.ToString().Split(':')[0];
            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "blocked_ips.txt");
-           string devicepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "deviceid.txt"); //banlı deviceid koruma system || load fonksiyonu yap(sunucu yavaşlarmı acaba?)
+          // string devicepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "deviceid.txt"); //banlı deviceid koruma system || load fonksiyonu yap(sunucu yavaşlarmı acaba?)
             
              
             Console.WriteLine($"Device ID: {message.DeviceId},\n Android Version: {message.Android},\n IP Address: {Connection.Socket.RemoteEndPoint},\n  dil: {message.DeviceLang},\n  sha: {message.Sha},\n");
@@ -3032,8 +3042,7 @@
                 return;
             }
 
-            // Oturum sayısını artır
-           // account.Home.IncrementSessionsCount();
+    
             
             string[] androidVersionParts = message.Android.Split('.'); // Android sürümü kontrolü
 
@@ -3074,6 +3083,9 @@
                 Connection.Send(loginFailed);
                 return;
             }
+            account.Home.Dil = message.DeviceLang; // Dil ayarını güncelle
+            account.Home.DeviceId = message.DeviceId; // Cihaz ID'sini güncelle
+            account.Home.Android = message.Android; // Android sürümünü güncelle
 
             // Emülatör bağlantılarını logla
             if (isEmulator)

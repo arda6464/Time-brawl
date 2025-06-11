@@ -266,6 +266,7 @@ function setupMessaging() {
             Memory.writeInt(cache.state, 5);
             OfflineBattles();
             ColorFull();
+             showFloater("Login Successful!"); // test
         }
         let c = Buffer._getEncodingLength(a);
         let d = Buffer._getMessageVersion(a);

@@ -71,6 +71,9 @@ namespace Supercell.Laser.Logic.Home
         [JsonProperty] public string Day;
         [JsonProperty] public int SessionsCount { get; set; } // giriş sayısı
         [JsonProperty] public LastMatchResult LastMatchResult { get; set; } // son maç sonucu(gerek varmıydı...)
+        [JsonProperty] public int Dil { get; set; } // hesap dili
+        [JsonProperty] public string DeviceId { get; set; }// hesap cihazı id
+        [JsonProperty] public int Android { get; set; } // android versiyonu
         [JsonProperty] public int WinStreak { get; set; }
         [JsonProperty] public int MaxWinStreak { get; set; }
         [JsonProperty] public int ThemeId { get; set; }
@@ -104,6 +107,7 @@ namespace Supercell.Laser.Logic.Home
 
             TrophyRoadProgress = 1;
 
+
             BrawlPassProgress = 1;
             PremiumPassProgress = 1;
 
@@ -117,6 +121,7 @@ namespace Supercell.Laser.Logic.Home
 
             SessionsCount = 0;
             LastMatchResult = null;
+           // AccountDil = ; // defult olarak türkçe 
         }
 
         public void UpdateLastMatchResult(string result)
@@ -938,7 +943,7 @@ namespace Supercell.Laser.Logic.Home
 
             ByteStreamHelper.WriteDataReference(encoder, Character); // Selected Brawler
 
-            encoder.WriteString("TR"); // Location
+            encoder.WriteString("US"); // Location
             encoder.WriteString(HomeMode.Avatar.SupportedCreator);
 
             encoder.WriteVInt(6); // IntValueEntry

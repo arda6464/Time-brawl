@@ -307,44 +307,7 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
      }
  }*/
 
-  public class SendCustomMessage : CommandModule<CommandContext> // test edilmedi!!!
-    {
-        [Command("ozelmesaj")]
-        public static string ExecuteSendCustomMessage([CommandParameter(Remainder = true)] string message)
-        {
-            if (string.IsNullOrEmpty(message))
-            {
-                return "Kullanım: !ozelmesaj [mesaj]";
-            }
 
-            try
-            {
-                int sentCount = 0;
-                var sessions = Sessions.ActiveSessions.Values.ToArray();
-
-                foreach (var session in sessions)
-                {
-                    CustomMessage customMessage = new()
-                    {
-                        Message = message
-                    };
-
-                    session.Connection.Send(customMessage);
-                    sentCount++;
-                }
-
-             /*   WebhookHelper.SendNotification(
-                    $"Özel mesaj gönderildi: {message}\nToplam {sentCount} oyuncuya iletildi."
-                );*/
-
-                return $"Özel mesaj başarıyla gönderildi. Toplam {sentCount} oyuncuya iletildi.";
-            }
-            catch (Exception ex)
-            {
-                return $"Bir hata oluştu: {ex.Message}";
-            }
-        }
-    }
 
 
 
@@ -1443,6 +1406,14 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
             string sessions = ConvertInfoToData(account.Home.SessionsCount);
            string lastMatch = account.Home.LastMatchResult?.Result.ToString() ?? "No match result";
            string WinStreak = ConvertInfoToData(account.Home.WinStreak);
+           int Dil = ConvertInfoToData(account.Home.Dil); // daha sonra tr-TR diye eklenecek
+           string lang = Dil switch
+            {
+                18 => "Türkçe",
+                0 => "English",
+                _ => "Bilinmiyor"
+            }; 
+            Dil = lang;
 
 
             string username = DatabaseHelper.ExecuteScalar(
@@ -1458,6 +1429,7 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
                 + $"IpAddress: {ipAddress}\n"
                 + $"en son giriş: {lastLoginTime} UTC\n"
                 + $"Cihaz {device}\n"
+                + $"Dil: {Dil}\n"
                 + $"# hesap bilgileri\n"
                 + $"isim: {name}\n"
                 + $"Token: {token}\n"

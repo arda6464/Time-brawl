@@ -34,7 +34,8 @@ namespace Supercell.Laser.Server
 
             // Sunucu başlatıldı
             Logger.Print("Server started successfully!");
-            Console.ReadKey();
+           ExitHandler.Init();
+            CmdHandler.Start();
            
         }
     }

@@ -96,7 +96,6 @@ namespace Supercell.Laser.Logic.Message
                 {19001, typeof(LatencyTestResultMessage)},
 
                 {20161, typeof(ShutdownStartedMessage)},
-                {20162, typeof(CustomMessage)},
 
                 //{14330, typeof(SendAllianceMailMessage)},
             };
