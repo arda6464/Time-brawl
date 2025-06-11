@@ -106,7 +106,7 @@
             bool hasPremium = HomeMode.Home.PremiumEndTime >= DateTime.UtcNow;
               long accountId = HomeMode.Avatar.AccountId;
               Account acc = Accounts.Load(accountId);
-              Console.WriteLine($"Account: {acc.AccountId} - {acc.Avatar.Name}");
+            //  Console.WriteLine($"Account: {acc.AccountId} - {acc.Avatar.Name}");
             if (acc.Home.Dil == 18)
             {
                 LobbyInfoMessage a = new()

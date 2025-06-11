@@ -1406,14 +1406,19 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
             string sessions = ConvertInfoToData(account.Home.SessionsCount);
            string lastMatch = account.Home.LastMatchResult?.Result.ToString() ?? "No match result";
            string WinStreak = ConvertInfoToData(account.Home.WinStreak);
-           int Dil = ConvertInfoToData(account.Home.Dil); // daha sonra tr-TR diye eklenecek
+          string dilStr = ConvertInfoToData(account.Home.Dil);
+          if (!int.TryParse(dilStr, out int Dil))
+            {
+              Dil; // default değer
+             }
+  
            string lang = Dil switch
             {
                 18 => "Türkçe",
                 0 => "English",
                 _ => "Bilinmiyor"
             }; 
-            Dil = lang;
+           
 
 
             string username = DatabaseHelper.ExecuteScalar(
@@ -1429,7 +1434,7 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
                 + $"IpAddress: {ipAddress}\n"
                 + $"en son giriş: {lastLoginTime} UTC\n"
                 + $"Cihaz {device}\n"
-                + $"Dil: {Dil}\n"
+                + $"Dil: {lang}\n"
                 + $"# hesap bilgileri\n"
                 + $"isim: {name}\n"
                 + $"Token: {token}\n"
