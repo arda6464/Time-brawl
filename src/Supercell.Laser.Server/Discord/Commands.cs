@@ -56,6 +56,7 @@
     using Supercell.Laser.Server.Networking.Session;
     using Supercell.Laser.Server.Networking.UDP.Game;
     using Supercell.Laser.Server.Settings;
+    using Supercell.Laser.Logic.Notification;
   
 
    // public class DatabaseHelper
@@ -486,8 +487,6 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
             }
         }
     }
-
-
 
 
 
@@ -1407,10 +1406,11 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
            string lastMatch = account.Home.LastMatchResult?.Result.ToString() ?? "No match result";
            string WinStreak = ConvertInfoToData(account.Home.WinStreak);
           string dilStr = ConvertInfoToData(account.Home.Dil);
-          if (!int.TryParse(dilStr, out int Dil))
-            {
-              Dil; // default değer
-             }
+          int Dil = 0; // varsayılan değer
+          if (!int.TryParse(dilStr, out Dil))
+          {
+              // Parse edilemezse varsayılan değer kullanılacak
+          }
   
            string lang = Dil switch
             {
@@ -2439,58 +2439,8 @@ public class UserInfoo : CommandModule<CommandContext>
             }
         }
     }
+
+   
 }
     
- public class SendShutdownMessage : CommandModule<CommandContext> // (çalışmıyor)
-{
-    [Command("kapatmesaj")]
-    public static string ExecuteSendShutdownMessage([CommandParameter(Remainder = true)] string message)
-    {
-        if (string.IsNullOrEmpty(message))
-        {
-            return "Kullanım: !kapatmesaj [mesaj]";
-        }
-
-        try
-        {
-            int sentCount = 0;
-            var sessions = Sessions.ActiveSessions.Values.ToArray();
-            bool isUrgent = message.ToLower().Contains("acil") ||
-                          message.ToLower().Contains("urgent") ||
-                          message.ToLower().Contains("emergency");
-
-            foreach (var session in sessions)
-            {
-                var shutdownMessage = new CustomShutdownMessage
-                {
-                    Message = message,
-                    TimeLeft = isUrgent ? 30 : 60, // Acil durumda 30 saniye, normalde 60 saniye
-                    IsUrgent = isUrgent
-                };
-
-                session.Connection.Send(shutdownMessage);
-                sentCount++;
-            }
-
-
-            return $"Kapatma mesajı başarıyla gönderildi.\n" +
-                   $"Mesaj: {message}\n" +
-                   $"Etkilenen Oyuncu: {sentCount}\n" +
-                   $"Durum: {(isUrgent ? "Acil" : "Normal")}\n" +
-                   $"Kalan Süre: {(isUrgent ? "30" : "60")} saniye";
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Kapatma mesajı gönderilirken hata: {ex.Message}");
-            return $"Bir hata oluştu: {ex.Message}";
-        }
-    }
-
-
-
-
-
-
-
-}
  

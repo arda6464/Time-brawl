@@ -107,11 +107,23 @@
               long accountId = HomeMode.Avatar.AccountId;
               Account acc = Accounts.Load(accountId);
             //  Console.WriteLine($"Account: {acc.AccountId} - {acc.Avatar.Name}");
-            if (acc.Home.Dil == 18)
+            if (acc.Home.Dil == 18) //türkçe 
             {
+                int saat = DateTime.Now.Hour;
+                string mesaj;
+                if (saat >= 6 && saat < 12)
+            mesaj = "Günaydın!";
+        else if (saat >= 12 && saat < 18)
+            mesaj = "İyi günler!";
+        else if (saat >= 18 && saat < 22)
+            mesaj = "İyi akşamlar!";
+        else
+            mesaj = "İyi geceler!";
+
+
                 LobbyInfoMessage a = new()
                 {
-                    LobbyData = $"iyi akşamlar arda :)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhi'",
+                    LobbyData = $" {mesaj} {acc.avatar.Name} :)\nPremium: {hasPremium}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhi'",
                     PlayersCount = 0
                 };
                 Connection.Send(a);

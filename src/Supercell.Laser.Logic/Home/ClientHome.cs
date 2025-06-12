@@ -72,7 +72,6 @@ namespace Supercell.Laser.Logic.Home
         [JsonProperty] public int SessionsCount { get; set; } // giriş sayısı
         [JsonProperty] public LastMatchResult LastMatchResult { get; set; } // son maç sonucu(gerek varmıydı...)
         [JsonProperty] public int Dil { get; set; } // hesap dili
-        [JsonProperty] public string DeviceId { get; set; }// hesap cihazı id
         [JsonProperty] public string Android { get; set; } // android versiyonu
         [JsonProperty] public int WinStreak { get; set; }
         [JsonProperty] public int MaxWinStreak { get; set; }
