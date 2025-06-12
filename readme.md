@@ -90,7 +90,6 @@ apk'yı decompile edin ve `lib/armeabi-v7a/liberder.script.so` dosyasındaki ip 
 
  - [xeon](https://git.xeondev.com/xeon) ve Erder'in [royale brawl](https://github.com/Erder00/royale-brawl) projesine dayanmaktadır
  - discord işlemleri için [netcord](https://netcord.dev) kullanılmaktadır (gerçekten harika, bir göz atın)
- - [spz](https://github.com/spz2020), [santer](https://github.com/SANS3R66) ve [8Hacc](https://github.com/8-bitHacc)'a pull request'leri için teşekkürler <3
 
 ## Yapılacaklar
 
