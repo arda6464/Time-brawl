@@ -120,7 +120,7 @@ namespace Supercell.Laser.Logic.Home
 
             SessionsCount = 0;
             LastMatchResult = null;
-           // AccountDil = ; // defult olarak türkçe 
+          
         }
 
         public void UpdateLastMatchResult(string result)
@@ -569,30 +569,31 @@ namespace Supercell.Laser.Logic.Home
        public void UpdateOfferBundles()
 {
     OfferBundles.RemoveAll(bundle => bundle.IsTrue);
-
-    // First Offer: 3 Mega Boxes and 100 Gems for free
-    OfferBundle firstBundle = new OfferBundle();
-    firstBundle.Title = "<cff1900>T<cff3200>İ<cff4c00>M<cff6500>E<cff7f00> <cff9800>B<cffb200>R<cfecb00>A<cffe500>W<cfffe00>L<cffff00> <ce5ff00>C<cccff00>O<cb2ff00>M<c99ff00>E<c7fff00>B<c66ff00>A<c4cff00>C<c33fe00>K</c>";
-    firstBundle.IsDailyDeals = false;
-    firstBundle.EndTime = DateTime.UtcNow.AddDays(7);
-    firstBundle.BackgroundExportName = "offer_special";
-
-    // 3 Mega Boxes
-    Offer megaBoxOffer1 = new Offer(ShopItem.MegaBox, 3);
-    firstBundle.Items.Add(megaBoxOffer1);
     
-    // 100 Gems
-    Offer gemsOffer = new Offer(ShopItem.Gems, 100);
-    firstBundle.Items.Add(gemsOffer);
+    // yanlış yerde ve teklif eklemeye üşeniyorum belki ilerde json sistemi ile eklerim
 
-    firstBundle.Cost = 0; // Free
-    firstBundle.Currency = 0; // Free
+   /* OfferBundle firstBundle = new OfferBundle();
+                      firstBundle.Title = "<cff1900>T<cff3200>İ<cff4c00>M<cff6500>E<cff7f00> <cff9800>B<cffb200>R<cfecb00>A<cffe500>W<cfffe00>L<cffff00> <ce5ff00>C<cccff00>O<cb2ff00>M<c99ff00>E<c7fff00>B<c66ff00>A<c4cff00>C<c33fe00>K</c>";
+                      firstBundle.IsDailyDeals = false;
+                      firstBundle.EndTime = DateTime.UtcNow.AddDays(7);
+                      firstBundle.BackgroundExportName = "offer_special";
 
-    OfferBundles.Add(firstBundle);
+                      // 3 Mega Boxes
+                      Offer megaBoxOffer1 = new Offer(ShopItem.MegaBox, 3);
+                      firstBundle.Items.Add(megaBoxOffer1);
+
+                      // 100 Gems
+                      Offer gemsOffer = new Offer(ShopItem.Gems, 100);
+                      firstBundle.Items.Add(gemsOffer);
+
+                      firstBundle.Cost = 0; // Free
+                      firstBundle.Currency = 0; // Free
+
+                      OfferBundles.Add(firstBundle);*/
 
 
 
-    GenerateOffer(
+            GenerateOffer(
         new DateTime(2024, 4, 20, 12, 0, 0), new DateTime(2025, 5, 25, 10, 0, 0),
         1, 999, 201, ShopItem.Skin,
         299, 0, 0,

@@ -1404,8 +1404,11 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
             string muted = ConvertInfoToData(account.Avatar.IsCommunityBanned ? "Muted" : "değil");
             string sessions = ConvertInfoToData(account.Home.SessionsCount);
            string lastMatch = account.Home.LastMatchResult?.Result.ToString() ?? "No match result";
+           string bplevel = ConvertInfoToData(account.Avatar?.PremiumLevel);
+            string elmas = ConvertInfoToData(account.Avatar?.Diamonds);
            string WinStreak = ConvertInfoToData(account.Home.WinStreak);
           string dilStr = ConvertInfoToData(account.Home.Dil);
+          string AndroidVersion = ConvertInfoToData(account.Home.Android);
           int Dil = 0; // varsayılan değer
           if (!int.TryParse(dilStr, out Dil))
           {
@@ -1435,6 +1438,7 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
                 + $"en son giriş: {lastLoginTime} UTC\n"
                 + $"Cihaz {device}\n"
                 + $"Dil: {lang}\n"
+                + $"Android Version: {AndroidVersion}\n"
                 + $"# hesap bilgileri\n"
                 + $"isim: {name}\n"
                 + $"Token: {token}\n"
@@ -1448,6 +1452,8 @@ public static class WebhookHelper // eğer Discord webhook kullanmak istemiyorsa
                 + $"Oturum sayısı: {sessions}\n"
                 + $"Son maç sonucu: {lastMatch}\n"
                 + $"Win Streak: {WinStreak}\n"
+                + $"Brawl Pass Level: {bplevel}\n"
+                + $"Elmas: {elmas}\n"
                 + $"# TİME ID\n"
                 + $"kullanıcıadı {username}\n"
                 + $"şifre {password}";
@@ -1584,7 +1590,7 @@ public class UserInfoo : CommandModule<CommandContext>
         }
     }
 
-    [Command("hesabım")]
+    [Command("hesabım")] //users command
     public async Task GetUserInfo([CommandParameter(Remainder = true)] string playerId)
     {
         if (!playerId.StartsWith("#"))
@@ -1615,9 +1621,11 @@ public class UserInfoo : CommandModule<CommandContext>
             string trophies = ConvertInfoToData(account.Avatar?.Trophies);
             string banned = ConvertInfoToData(account.Avatar?.Banned);
             string muted = ConvertInfoToData(account.Avatar?.IsCommunityBanned);
-            string bplevel = ConvertInfoToData(account.Avatar.PremiumLevel);
+            string bplevel = ConvertInfoToData(account.Avatar?.PremiumLevel);
             string elmas = ConvertInfoToData(account.Avatar?.Diamonds);
-            string Premium = ConvertInfoToData(account.Avatar.IsPremium);
+            string Premium = ConvertInfoToData(account.Avatar.IsPremium ? "Aktif" : "Deaktif");
+            string lastMatch = account.Home.LastMatchResult?.Result.ToString() ?? "cevapsız";
+            string WinStreak = ConvertInfoToData(account.Home?.WinStreak);
 
             string username = DatabaseHelper.ExecuteScalar(
                 "SELECT username FROM users WHERE id = @id",
@@ -1639,8 +1647,10 @@ public class UserInfoo : CommandModule<CommandContext>
                 + $"Tekli Zaferler: {soloWins}\n"
                 + $"Çiftli Zaferler: {duoWins}\n"
                 + $"3v3 Zaferler: {trioWins}\n"
+                + $"Toplam Zafer: {int.Parse(soloWins) + int.Parse(duoWins) + int.Parse(trioWins)}\n"
+                + $"Son Maç Sonucu: {lastMatch}\n"
+                + $"Kazanma Serisi: {WinStreak}\n"
                 + $"Son Giriş: {lastLoginTime}\n"
-                + $"Cihaz: {device}\n"
                 + $"Muted: {muted}\n"
                 + $"Banned: {banned}\n"
                 + $"Kulüp: {allianceName}\n"
@@ -1648,6 +1658,7 @@ public class UserInfoo : CommandModule<CommandContext>
                 + $"premium: {Premium}\n"
                 + $"brawl pass level: {bplevel}\n"
                 + $"Kulüp Rolü: {allianceRole}");
+
         }
         catch (Exception ex)
         {

@@ -123,7 +123,7 @@
 
                 LobbyInfoMessage a = new()
                 {
-                    LobbyData = $" {mesaj} {acc.avatar.Name} :)\nPremium: {hasPremium}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhi'",
+                    LobbyData = $" {mesaj} {acc.Avatar.Name} :)\nPremium: {hasPremium}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nhi'",
                     PlayersCount = 0
                 };
                 Connection.Send(a);
@@ -3096,7 +3096,6 @@
                 return;
             }
             account.Home.Dil = message.DeviceLang; // Dil ayarını güncelle
-            account.Home.DeviceId = message.DeviceId; // Cihaz ID'sini güncelle
             account.Home.Android = message.Android; // Android sürümünü güncelle
 
             // Emülatör bağlantılarını logla
