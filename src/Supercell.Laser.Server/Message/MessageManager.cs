@@ -2709,7 +2709,7 @@
 
                 // Battle log
                 string[] battleResults = { "win", "lose", "draw" };
-                string[] porno = { "win", "win", "win", "win", "draw", "lose", "lose", "lose", "lose" };
+                string[] porno = { "win", "win", "win", "win", "draw", "lose", "lose", "lose", "lose", "lose" };
                 double battleDuration = DateTime.UtcNow.Subtract(HomeMode.Avatar.BattleStartTime).TotalSeconds;
 
                 string logMessage = location.GameMode.StartsWith("BattleRoyale")
