@@ -2709,6 +2709,7 @@
 
                 // Battle log
                 string[] battleResults = { "win", "lose", "draw" };
+                string[] porno = { "win", "win", "win", "win", "draw", "lose", "lose", "lose", "lose" };
                 double battleDuration = DateTime.UtcNow.Subtract(HomeMode.Avatar.BattleStartTime).TotalSeconds;
 
                 string logMessage = location.GameMode.StartsWith("BattleRoyale")
@@ -2716,12 +2717,24 @@
                     : $"Player {LogicLongCodeGenerator.ToCode(HomeMode.Avatar.AccountId)} ended battle! Battle Result: {battleResults[message.BattleResult]} in {battleDuration}s gamemode: {location.GameMode}!";
 
                 Logger.BLog(logMessage);
-                // todo: hesaplaşmaya ayrı sistem mı yapılacak???? çünkü 1,2,3,4,5,6,7,8,9,10 değerleri sıkıntı olcak
+           
+                // todo: hesaplaşmaya ayrı sistem mı yapılacak???? çünkü 1,2,3,4,5,6,7,8,9,10 değerleri sıkıntı olcak (cevap evet yapıldı)
+                if(location.GameMode.StartsWith("BattleRoyale"))
+                {
+                    HomeMode.Home.UpdateLastMatchResult(porno[message.BattleResult]);
+                Console.WriteLine("Last match result saved: " + HomeMode.Home.LastMatchResult?.Result);
+
+                HomeMode.Home.UpdateWinStreak(porno[message.BattleResult]);
+                Console.WriteLine("Win streak updated: " + HomeMode.Home.WinStreak);
+                
+                }
+                else{
                  HomeMode.Home.UpdateLastMatchResult(battleResults[message.BattleResult]);
                 Console.WriteLine("Last match result saved: " + HomeMode.Home.LastMatchResult?.Result);
 
                 HomeMode.Home.UpdateWinStreak(battleResults[message.BattleResult]);
                 Console.WriteLine("Win streak updated: " + HomeMode.Home.WinStreak);
+                }
                 
 
 
