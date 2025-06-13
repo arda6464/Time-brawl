@@ -1157,11 +1157,7 @@ namespace Supercell.Laser.Logic.Home
             encoder.WriteVInt(0);
         }
 
-        // Oturum sayısını artırmak için yardımcı metod
-        public void IncrementSessionsCount()
-        {
-            SessionsCount++;
-        }
+      
     }
 
     // Son maç sonucu için yapı
@@ -1174,9 +1170,5 @@ namespace Supercell.Laser.Logic.Home
             Result = "draw"; // Varsayılan olarak yenilgi
         }
 
-        public override string ToString() // kullanılmıyor gibi
-        {
-            return Result == "win" ? "kazandı" : "kaybetti";
-        }
     }
 }
